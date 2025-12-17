@@ -1,0 +1,2235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Admin Panel - SFADC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sfadc-dark-bg: #004875;
+            --sfadc-gold: #DFA975;
+            --sfadc-green: #3AB54A;
+            --sfadc-blue: #0076BD;
+            --sfadc-brown: #8C5835;
+            --sfadc-red: #ED1C24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        .input-field { border: 1px solid #e2e8f0; border-radius: 0.5rem; outline: none; transition: all 0.2s; }
+        .input-field:focus { border-color: var(--sfadc-dark-bg); box-shadow: 0 0 0 2px rgba(0, 72, 117, 0.1); }
+        .loading-spinner { border-top-color: transparent; }
+        
+        /* New Styles for Admin Interface */
+        .admin-view { display: none; }
+        .admin-view.active { display: block; }
+        .nav-link-btn { transition: all 0.2s; }
+        .nav-link-btn.active { background-color: var(--sfadc-blue); color: white; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(0, 72, 117, 0.2); }
+
+        /* Style for sub-navigation (Office tabs) */
+        .office-nav-btn { background-color: #f1f5f9; border-left: 3px solid transparent; transition: all 0.2s; }
+        .office-nav-btn.active { background-color: #e0f2f7; border-left-color: var(--sfadc-blue); font-weight: 600; color: #004875; }
+        .office-sub-view { display: none; }
+        .office-sub-view.active { display: block; }
+        
+        /* Edit Panel specific styles */
+        #edit-member-panel.hidden, #edit-news-panel.hidden, #edit-about-panel.hidden, #edit-event-panel.hidden, #edit-admin-panel.hidden { display: none !important; }
+        
+        /* Mobile Menu Overlay for Side Nav */
+        #mobile-menu-overlay.hidden { display: none; }
+
+        /* Scrollbar Hide for mobile overlay content */
+         .no-scrollbar::-webkit-scrollbar { display: none; }
+         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="md:hidden bg-[#004875] text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+        <h1 class="text-xl font-extrabold text-[var(--sfadc-gold)]">SFADC Admin</h1>
+        <button id="mobile-menu-toggle" onclick="toggleMobileMenu()" class="p-1 rounded hover:bg-white/10">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 z-50 bg-[#004875] flex flex-col hidden md:hidden">
+        <div class="flex justify-between items-center p-4 border-b border-white/10">
+            <h1 class="text-xl font-extrabold text-[var(--sfadc-gold)]">Navigation</h1>
+            <button onclick="toggleMobileMenu()" class="text-white p-1 rounded hover:bg-white/10">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="flex-1 p-4 space-y-2 overflow-y-auto no-scrollbar">
+            <button onclick="switchView('dashboard'); toggleMobileMenu();" data-view="dashboard" class="nav-link-btn active w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+            </button>
+            <button onclick="switchView('upcoming-events'); toggleMobileMenu();" data-view="upcoming-events" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="calendar-days" class="w-5 h-5"></i> Upcoming Events
+            </button>
+            <button onclick="switchView('news-events'); toggleMobileMenu();" data-view="news-events" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="newspaper" class="w-5 h-5"></i> News & Events
+            </button>
+            <button onclick="switchView('about-us'); toggleMobileMenu();" data-view="about-us" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="info" class="w-5 h-5"></i> About Us
+            </button>
+            <button onclick="switchView('staff-management'); toggleMobileMenu();" data-view="staff-management" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="users" class="w-5 h-5"></i> Staff & Offices
+            </button>
+            <button onclick="switchView('admin-users'); toggleMobileMenu();" data-view="admin-users" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="shield-check" class="w-5 h-5"></i> Admin Users
+            </button>
+            <button onclick="switchView('contact-messages'); toggleMobileMenu();" data-view="contact-messages" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                <i data-lucide="mail" class="w-5 h-5"></i> Contact Messages
+            </button>
+            <div class="pt-4 border-t border-white/10 mt-4">
+                <button onclick="switchView('settings'); toggleMobileMenu();" data-view="settings" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="settings" class="w-5 h-5 text-[var(--sfadc-gold)]"></i> Settings & Design
+                </button>
+                <button onclick="logoutAdmin(); toggleMobileMenu();" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-600 text-red-200 mt-2">
+                    <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Desktop Sidebar Navigation -->
+        <nav class="hidden md:flex w-64 bg-[#004875] text-white flex-col flex-shrink-0">
+            <div class="p-6 border-b border-white/10">
+                <h1 class="text-xl font-extrabold text-[var(--sfadc-gold)]">SFADC Admin</h1>
+                <p class="text-xs text-slate-300">Content Management</p>
+            </div>
+            <div class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="switchView('dashboard')" data-view="dashboard" class="nav-link-btn active w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </button>
+                <button onclick="switchView('upcoming-events')" data-view="upcoming-events" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="calendar-days" class="w-5 h-5"></i> Upcoming Events
+                </button>
+                <button onclick="switchView('news-events')" data-view="news-events" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="newspaper" class="w-5 h-5"></i> News & Events
+                </button>
+                <button onclick="switchView('about-us')" data-view="about-us" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="info" class="w-5 h-5"></i> About Us
+                </button>
+                <button onclick="switchView('staff-management')" data-view="staff-management" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="users" class="w-5 h-5"></i> Staff & Offices
+                </button>
+                <button onclick="switchView('admin-users')" data-view="admin-users" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i> Admin Users
+                </button>
+                <button onclick="switchView('contact-messages')" data-view="contact-messages" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="mail" class="w-5 h-5"></i> Contact Messages
+                </button>
+            </div>
+            <div class="p-4 border-t border-white/10 space-y-2">
+                <button onclick="switchView('settings')" data-view="settings" class="nav-link-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
+                    <i data-lucide="settings" class="w-5 h-5 text-[var(--sfadc-gold)]"></i> Settings & Design
+                </button>
+                <button onclick="logoutAdmin()" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-600 text-red-200">
+                    <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div id="auth-status" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg hidden">
+                Authentication failed. Content management is disabled.
+            </div>
+
+            <div id="admin-interface" class="space-y-8 hidden"> <!-- HIDDEN by default until logic check passes -->
+                
+                <section id="dashboard" class="admin-view active">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">Dashboard Summary</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[var(--sfadc-blue)]">
+                            <p class="text-sm text-slate-500">Total Messages</p>
+                            <h2 class="text-4xl font-extrabold mt-1 text-slate-800" id="dash-message-count">0</h2>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[var(--sfadc-green)]">
+                            <p class="text-sm text-slate-500">Published News</p>
+                            <h2 class="text-4xl font-extrabold mt-1 text-slate-800" id="dash-news-count">0</h2>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[var(--sfadc-gold)]">
+                            <p class="text-sm text-slate-500">Active Staff</p>
+                            <h2 class="text-4xl font-extrabold mt-1 text-slate-800" id="dash-staff-count">--</h2> 
+                        </div>
+                    </div>
+                </section>
+
+                <!-- UPCOMING EVENTS SECTION -->
+                <section id="upcoming-events" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">Upcoming Events</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- ADD EVENT FORM -->
+                        <div class="lg:col-span-2 bg-white p-6 md:p-8 rounded-xl shadow-xl border border-slate-100">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                                <i data-lucide="calendar-plus" class="w-6 h-6 text-[var(--sfadc-blue)]"></i> Add New Event
+                            </h2>
+                            <form id="upcomingEventForm" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="eventDate" class="block text-sm font-medium text-slate-700 mb-1">Event Date</label>
+                                        <input type="date" id="eventDate" class="input-field w-full p-3" required>
+                                    </div>
+                                    <div>
+                                        <label for="eventTitle" class="block text-sm font-medium text-slate-700 mb-1">Event Title</label>
+                                        <input id="eventTitle" class="input-field w-full p-3" placeholder="e.g. Convocation Ceremony" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="eventLocation" class="block text-sm font-medium text-slate-700 mb-1">Location / Short Description</label>
+                                    <input id="eventLocation" class="input-field w-full p-3" placeholder="e.g. Auditorium or Main Hall" required>
+                                </div>
+
+                                <!-- CUSTOM COLOR OPTION -->
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                    <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                        <input type="checkbox" id="useCustomColors" class="w-4 h-4 text-[var(--sfadc-blue)] rounded border-gray-300" onclick="toggleColorInputs('add')">
+                                        <span class="text-sm font-bold text-slate-700">Customize Colors (Optional)</span>
+                                    </label>
+                                    <div id="colorInputs" class="grid grid-cols-2 gap-4 hidden mt-2">
+                                        <div>
+                                            <label for="eventBgColor" class="block text-xs font-medium text-slate-500 mb-1">Date Box Background</label>
+                                            <input type="color" id="eventBgColor" class="w-full h-10 p-1 rounded border border-slate-300 cursor-pointer" value="#004875">
+                                        </div>
+                                        <div>
+                                            <label for="eventTextColor" class="block text-xs font-medium text-slate-500 mb-1">Date Box Text</label>
+                                            <input type="color" id="eventTextColor" class="w-full h-10 p-1 rounded border border-slate-300 cursor-pointer" value="#ffffff">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="addEventBtn" class="w-full bg-[var(--sfadc-blue)] text-white py-3 rounded-lg font-bold hover:bg-[var(--sfadc-blue)]/90 transition-colors flex items-center justify-center gap-2">
+                                    <span>Add Event</span>
+                                    <div id="event-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- EDIT EVENT PANEL -->
+                        <div class="lg:col-span-1 h-fit sticky top-8">
+                            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="edit-3" class="w-5 h-5 text-slate-400"></i> Edit Event
+                            </h2>
+                            
+                            <div id="edit-event-panel" class="bg-white p-6 rounded-xl shadow-xl border border-slate-200 hidden">
+                                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Update Event Details</h3>
+                                
+                                <form id="editEventForm" class="space-y-4">
+                                    <input type="hidden" id="edit-event-doc-id">
+                                    
+                                    <div>
+                                        <label for="edit-event-date" class="block text-xs font-medium text-slate-700 mb-1">Date</label>
+                                        <input type="date" id="edit-event-date" class="input-field w-full p-2" required>
+                                    </div>
+                                    <div>
+                                        <label for="edit-event-title" class="block text-xs font-medium text-slate-700 mb-1">Title</label>
+                                        <input id="edit-event-title" class="input-field w-full p-2" required>
+                                    </div>
+                                    <div>
+                                        <label for="edit-event-location" class="block text-xs font-medium text-slate-700 mb-1">Location / Description</label>
+                                        <input id="edit-event-location" class="input-field w-full p-2" required>
+                                    </div>
+
+                                    <!-- EDIT CUSTOM COLOR OPTION -->
+                                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                        <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                            <input type="checkbox" id="edit-useCustomColors" class="w-4 h-4 text-[var(--sfadc-blue)] rounded border-gray-300" onclick="toggleColorInputs('edit')">
+                                            <span class="text-xs font-bold text-slate-700">Customize Colors</span>
+                                        </label>
+                                        <div id="edit-colorInputs" class="grid grid-cols-2 gap-2 hidden mt-2">
+                                            <div>
+                                                <label for="edit-eventBgColor" class="block text-[10px] font-medium text-slate-500 mb-1">Background</label>
+                                                <input type="color" id="edit-eventBgColor" class="w-full h-8 p-1 rounded border border-slate-300 cursor-pointer">
+                                            </div>
+                                            <div>
+                                                <label for="edit-eventTextColor" class="block text-[10px] font-medium text-slate-500 mb-1">Text</label>
+                                                <input type="color" id="edit-eventTextColor" class="w-full h-8 p-1 rounded border border-slate-300 cursor-pointer">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="flex flex-col gap-2 pt-2">
+                                        <button type="submit" id="saveEventEditBtn" class="w-full bg-[var(--sfadc-green)] text-white py-2 rounded-lg font-bold text-sm hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                            <span>Save Changes</span>
+                                            <div id="edit-event-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                        </button>
+                                        <button type="button" onclick="deleteUpcomingEvent()" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition-colors">
+                                            Delete Event
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('edit-event-panel').classList.add('hidden'); document.getElementById('edit-event-placeholder').classList.remove('hidden');" class="w-full bg-slate-300 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-400 transition-colors">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="edit-event-placeholder" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] text-slate-500 flex items-center justify-center text-center text-sm">
+                                Click the edit icon on an event to modify it.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                            <i data-lucide="list-calendar" class="w-6 h-6 text-slate-400"></i> Scheduled Events
+                        </h2>
+                        <!-- LIST CONTAINER -->
+                        <div id="upcoming-events-list" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <p class="text-slate-500 italic col-span-full flex items-center justify-center py-6">
+                                <span class="loading-spinner w-5 h-5 border-2 border-slate-300 border-t-[var(--sfadc-blue)] rounded-full animate-spin mr-2"></span>
+                                Loading events...
+                            </p>
+                        </div>
+                    </div>
+                </section>
+                <!-- END UPCOMING EVENTS SECTION -->
+
+                <section id="news-events" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">News & Events Management</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <div class="lg:col-span-2 bg-white p-6 md:p-8 rounded-xl shadow-xl border border-slate-100">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                                <i data-lucide="file-plus" class="w-6 h-6 text-[var(--sfadc-green)]"></i> Add New Post
+                            </h2>
+                            <form id="newsForm" class="space-y-4">
+                                <div>
+                                    <label for="newsTitle" class="block text-sm font-medium text-slate-700 mb-1">Title</label>
+                                    <input id="newsTitle" class="input-field w-full p-3" placeholder="Title of the News or Event" required>
+                                </div>
+                                <div>
+                                    <label for="newsDesc" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                                    <textarea id="newsDesc" class="input-field w-full p-3" placeholder="Full description" rows="4" required></textarea>
+                                </div>
+                                <div>
+                                    <label for="newsDate" class="block text-sm font-medium text-slate-700 mb-1">Date of Post/Event</label>
+                                    <input type="date" id="newsDate" class="input-field w-full p-3" required>
+                                </div>
+                                <div>
+                                    <label for="newsCategory" class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                                    <select id="newsCategory" class="input-field w-full p-3">
+                                        <option value="academics">Academics</option>
+                                        <option value="union">Union</option>
+                                        <option value="sports">Sports</option>
+                                        <option value="culture">Culture</option>
+                                        <option value="awards">Awards</option>
+                                        <option value="events">Events</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="newsImage" class="block text-sm font-medium text-slate-700 mb-1">Image (Required)</label>
+                                    <input type="file" id="newsImage" accept="image/*" class="w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--sfadc-gold)] file:text-black hover:file:bg-[var(--sfadc-gold)]/80" required>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" id="newsSpotlight" class="w-5 h-5 text-[var(--sfadc-gold)] rounded focus:ring-[var(--sfadc-gold)] border-gray-300">
+                                        <span class="text-sm font-bold text-[#004875] flex items-center gap-2">
+                                            <i data-lucide="star" class="w-4 h-4 text-[var(--sfadc-gold)]"></i> 
+                                            Mark as Spotlight
+                                        </span>
+                                    </label>
+                                    <p class="text-xs text-slate-500 mt-1 ml-8">Checking this will highlight this news item on the homepage.</p>
+                                </div>
+
+                                <button type="submit" id="addNewsBtn" class="w-full bg-[var(--sfadc-green)] text-white py-3 rounded-lg font-bold hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                    <span>Publish News</span>
+                                    <div id="news-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="lg:col-span-1 h-fit sticky top-8">
+                            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="edit" class="w-5 h-5 text-slate-400"></i> Post Details
+                            </h2>
+                            <div id="edit-news-panel" class="bg-white p-6 rounded-xl shadow-xl border border-slate-200 hidden">
+                                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Edit News Post</h3>
+                                
+                                <form id="editNewsForm" class="space-y-4">
+                                    <input type="hidden" id="edit-news-doc-id">
+                                    <input type="hidden" id="edit-news-old-photo-url">
+
+                                    <div class="text-center">
+                                        <img id="edit-news-photo-preview" class="w-32 h-20 mx-auto object-cover mb-3 border-4 border-slate-100 rounded-lg" src="https://placehold.co/300x150?text=Image" alt="News Image">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="edit-news-title" class="block text-xs font-medium text-slate-700 mb-1">Title</label>
+                                        <input id="edit-news-title" class="input-field w-full p-2" required>
+                                    </div>
+                                    <div>
+                                        <label for="edit-news-desc" class="block text-xs font-medium text-slate-700 mb-1">Description</label>
+                                        <textarea id="edit-news-desc" class="input-field w-full p-2" rows="3" required></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="edit-news-date" class="block text-xs font-medium text-slate-700 mb-1">Date of Post/Event</label>
+                                        <input type="date" id="edit-news-date" class="input-field w-full p-2" required>
+                                    </div>
+                                    <div>
+                                        <label for="edit-news-category" class="block text-xs font-medium text-slate-700 mb-1">Category</label>
+                                        <select id="edit-news-category" class="input-field w-full p-2">
+                                            <option value="academics">Academics</option>
+                                            <option value="union">Union</option>
+                                            <option value="sports">Sports</option>
+                                            <option value="culture">Culture</option>
+                                            <option value="awards">Awards</option>
+                                            <option value="events">Events</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="edit-news-image" class="block text-xs font-medium text-slate-700 mb-1">Update Image</label>
+                                        <input type="file" id="edit-news-image" accept="image/*" class="w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-800 hover:file:bg-slate-300">
+                                    </div>
+
+                                    <div>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" id="edit-news-spotlight" class="w-4 h-4 text-[var(--sfadc-gold)] rounded focus:ring-[var(--sfadc-gold)] border-gray-300">
+                                            <span class="text-xs font-bold text-[#004875]">Mark as Spotlight</span>
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" id="saveNewsEditBtn" class="w-full bg-[var(--sfadc-green)] text-white py-2 rounded-lg font-bold text-sm hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                        <span>Save Changes</span>
+                                        <div id="edit-news-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                    </button>
+                                    <button type="button" onclick="deleteNewsPost()" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition-colors">
+                                        Delete Post
+                                    </button>
+                                    <button type="button" onclick="document.getElementById('edit-news-panel').classList.add('hidden'); document.getElementById('edit-news-placeholder').classList.remove('hidden');" class="w-full bg-slate-300 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-400 transition-colors">
+                                        Cancel
+                                    </button>
+                                </form>
+                            </div>
+                            <div id="edit-news-placeholder" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] text-slate-500 flex items-center justify-center">
+                                Select a news post from the list below to view/edit details.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                            <i data-lucide="list-checks" class="w-6 h-6 text-slate-400"></i> Published Posts (View/Edit)
+                        </h2>
+                        <div id="news-posts-list" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] space-y-4">
+                            <p class="text-slate-500 italic flex items-center justify-center py-6">
+                                <div class="w-5 h-5 border-2 border-slate-300 border-t-[var(--sfadc-blue)] rounded-full animate-spin mr-3 loading-spinner"></div>
+                                Loading published posts...
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="about-us" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">About Us Content Management</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                        
+                        <div class="lg:col-span-1 space-y-8">
+                            <div class="bg-white p-6 rounded-xl shadow-xl border border-slate-100 border-t-4 border-[var(--sfadc-blue)]">
+                                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                                    <i data-lucide="building" class="w-6 h-6 text-[var(--sfadc-blue)]"></i> Add Management Member
+                                </h2>
+                                <form id="managementForm" class="space-y-4">
+                                    <div>
+                                        <label for="mgmtName" class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                                        <input id="mgmtName" class="input-field w-full p-3" placeholder="Member Name" required>
+                                    </div>
+                                    <div>
+                                        <label for="mgmtDesignation" class="block text-sm font-medium text-slate-700 mb-1">Designation</label>
+                                        <input id="mgmtDesignation" class="input-field w-full p-3" placeholder="E.g., Chairman / Secretary" required>
+                                    </div>
+                                    <div>
+                                        <label for="mgmtPhoto" class="block text-sm font-medium text-slate-700 mb-1">Photo (Required)</label>
+                                        <input type="file" id="mgmtPhoto" accept="image/*" class="w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--sfadc-gold)] file:text-black hover:file:bg-[var(--sfadc-gold)]/80" required>
+                                    </div>
+                                    <button type="submit" id="addMgmtBtn" class="w-full bg-[var(--sfadc-blue)] text-white py-3 rounded-lg font-bold hover:bg-[var(--sfadc-blue)]/90 transition-colors flex items-center justify-center gap-2">
+                                        <span>Add Management Member</span>
+                                        <div id="mgmt-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-xl border border-slate-100 border-t-4 border-[var(--sfadc-green)]">
+                                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                                    <i data-lucide="graduation-cap" class="w-6 h-6 text-[var(--sfadc-green)]"></i> Add Faculty Member
+                                </h2>
+                                <form id="facultyForm" class="space-y-4">
+                                    <div>
+                                        <label for="facultyName" class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                                        <input id="facultyName" class="input-field w-full p-3" placeholder="Faculty Name" required>
+                                    </div>
+                                    <div>
+                                        <label for="facultyDesignation" class="block text-sm font-medium text-slate-700 mb-1">Designation</label>
+                                        <input id="facultyDesignation" class="input-field w-full p-3" placeholder="E.g., Head of Department, Lecturer" required>
+                                    </div>
+                                    <div>
+                                        <label for="facultyPhone" class="block text-sm font-medium text-slate-700 mb-1">Phone Number (Optional)</label>
+                                        <input type="text" id="facultyPhone" class="input-field w-full p-3" placeholder="1234567890" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                    </div>
+                                    <div>
+                                        <label for="facultyPhoto" class="block text-sm font-medium text-slate-700 mb-1">Photo (Required)</label>
+                                        <input type="file" id="facultyPhoto" accept="image/*" class="w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--sfadc-gold)] file:text-black hover:file:bg-[var(--sfadc-gold)]/80" required>
+                                    </div>
+                                    <button type="submit" id="addFacultyBtn" class="w-full bg-[var(--sfadc-green)] text-white py-3 rounded-lg font-bold hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                        <span>Add Faculty Member</span>
+                                        <div id="faculty-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-3">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                                <i data-lucide="list" class="w-6 h-6 text-slate-400"></i> Current Members
+                            </h2>
+                            
+                            <div class="flex border-b border-slate-200 mb-4">
+                                <button onclick="switchAboutView('management')" data-about="management" class="about-nav-btn active px-4 py-2 text-sm font-medium text-white bg-[var(--sfadc-blue)] rounded-t-lg transition">Management</button>
+                                <button onclick="switchAboutView('faculty')" data-about="faculty" class="about-nav-btn px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 transition">Faculty</button>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div id="about-member-lists" class="lg:col-span-2 bg-white p-4 rounded-xl shadow border border-slate-100 min-h-[200px] relative">
+                                    <div id="about-view-management" class="about-sub-view active space-y-3">
+                                        <h3 class="text-lg font-bold text-[var(--sfadc-blue)] mb-2">Management Committee List</h3>
+                                        <div id="management-members-list" class="grid grid-cols-1 gap-3">
+                                            <p class="text-slate-500 italic">Loading management members...</p>
+                                        </div>
+                                    </div>
+                                    <div id="about-view-faculty" class="about-sub-view hidden space-y-3">
+                                        <h3 class="text-lg font-bold text-[var(--sfadc-green)] mb-2">Faculty List</h3>
+                                        <div id="faculty-members-list" class="grid grid-cols-1 gap-3">
+                                            <p class="text-slate-500 italic">Loading faculty members...</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="lg:col-span-1">
+                                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                        <i data-lucide="user" class="w-5 h-5 text-slate-400"></i> Member Details
+                                    </h2>
+                                    <div id="edit-about-panel" class="bg-white p-6 rounded-xl shadow-xl border border-slate-200 hidden sticky top-8">
+                                        <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Edit About Member</h3>
+                                        
+                                        <form id="editAboutForm" class="space-y-4">
+                                            <input type="hidden" id="edit-about-doc-id">
+                                            <input type="hidden" id="edit-about-collection">
+                                            <input type="hidden" id="edit-about-old-photo-url">
+                                            
+                                            <div class="text-center">
+                                                <img id="edit-about-photo-preview" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 border-4 border-slate-100" src="https://placehold.co/150x150?text=Photo" alt="Member Photo">
+                                            </div>
+
+                                            <div>
+                                                <label for="edit-about-name" class="block text-xs font-medium text-slate-700 mb-1">Name</label>
+                                                <input id="edit-about-name" class="input-field w-full p-2" required>
+                                            </div>
+                                            <div>
+                                                <label for="edit-about-designation" class="block text-xs font-medium text-slate-700 mb-1">Designation</label>
+                                                <input id="edit-about-designation" class="input-field w-full p-2" required>
+                                            </div>
+                                            <div id="edit-about-phone-field" class="hidden">
+                                                <label for="edit-about-phone" class="block text-xs font-medium text-slate-700 mb-1">Phone Number (Optional)</label>
+                                                <input type="text" id="edit-about-phone" class="input-field w-full p-2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                            </div>
+                                            
+                                            <div>
+                                                <label for="edit-about-photo" class="block text-xs font-medium text-slate-700 mb-1">Update Photo</label>
+                                                <input type="file" id="edit-about-photo" accept="image/*" class="w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-800 hover:file:bg-slate-300">
+                                            </div>
+
+                                            <button type="submit" id="saveAboutEditBtn" class="w-full bg-[var(--sfadc-green)] text-white py-2 rounded-lg font-bold text-sm hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                                <span>Save Changes</span>
+                                                <div id="edit-about-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                            </button>
+                                            <button type="button" onclick="deleteAboutMember()" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition-colors">
+                                                Delete Member
+                                            </button>
+                                            <button type="button" onclick="document.getElementById('edit-about-panel').classList.add('hidden'); document.getElementById('edit-about-placeholder').classList.remove('hidden');" class="w-full bg-slate-300 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-400 transition-colors">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div id="edit-about-placeholder" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] text-slate-500 flex items-center justify-center">
+                                        Select a member from the list to view/edit details.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="staff-management" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">Staff & Office Management</h1>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-xl border border-slate-100 h-fit sticky top-8">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="user-plus" class="w-5 h-5 text-[var(--sfadc-gold)]"></i> Add New Member
+                            </h2>
+                            <form id="officeForm" class="space-y-4">
+                                <div>
+                                    <label for="officeName" class="block text-xs font-medium text-slate-700 mb-1">Member Name</label>
+                                    <input id="officeName" class="input-field w-full p-2" placeholder="E.g., Usthad Name" required>
+                                </div>
+                                <div>
+                                    <label for="officeInfo" class="block text-xs font-medium text-slate-700 mb-1">Designation</label>
+                                    <input id="officeInfo" class="input-field w-full p-2" placeholder="E.g., Academic Co-ordinator / HOD" required>
+                                </div>
+                                <!-- Added Duty / Works Input -->
+                                <div>
+                                    <label for="officeDuty" class="block text-xs font-medium text-slate-700 mb-1">Duty / Works (Optional)</label>
+                                    <input id="officeDuty" class="input-field w-full p-2" placeholder="Specific responsibilities (optional)">
+                                </div>
+                                <div>
+                                    <label for="officeDepartment" class="block text-xs font-medium text-slate-700 mb-1">Department/Office</label>
+                                    <select id="officeDepartment" class="input-field w-full p-2">
+                                        <option value="Academic">Academic Office</option>
+                                        <option value="Welfare">Office of Welfare</option>
+                                        <option value="IMAD">IMAD Students Union</option>
+                                        <option value="Hadeeth">Hadeeth Department</option>
+                                        <option value="Outreach">Outreach Wing</option>
+                                        <option value="Management">Management Committee</option>
+                                        <option value="Faculty">Faculty (General Staff)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="officePhoto" class="block text-xs font-medium text-slate-700 mb-1">Photo (Required)</label>
+                                    <input type="file" id="officePhoto" accept="image/*" class="w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[var(--sfadc-gold)] file:text-black hover:file:bg-[var(--sfadc-gold)]/80" required>
+                                </div>
+                                <button type="submit" id="addOfficeBtn" class="w-full bg-[var(--sfadc-dark-bg)] text-white py-2 rounded-lg font-bold text-sm hover:bg-[var(--sfadc-dark-bg)]/90 transition-colors flex items-center justify-center gap-2">
+                                    <span>Add Member</span>
+                                    <div id="office-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            
+                            <div class="lg:col-span-2">
+                                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i data-lucide="building-2" class="w-5 h-5 text-slate-400"></i> Office Member Lists
+                                </h2>
+
+                                <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-2">
+                                    <button onclick="switchOfficeView('Academic')" data-office="Academic" class="office-nav-btn active px-4 py-2 rounded-lg text-sm">Academic Office</button>
+                                    <button onclick="switchOfficeView('Welfare')" data-office="Welfare" class="office-nav-btn px-4 py-2 rounded-lg text-sm">Office of Welfare</button>
+                                    <button onclick="switchOfficeView('IMAD')" data-office="IMAD" class="office-nav-btn px-4 py-2 rounded-lg text-sm">IMAD Union</button>
+                                    <button onclick="switchOfficeView('Hadeeth')" data-office="Hadeeth" class="office-nav-btn px-4 py-2 rounded-lg text-sm">Hadeeth Dept.</button>
+                                    <button onclick="switchOfficeView('Outreach')" data-office="Outreach" class="office-nav-btn px-4 py-2 rounded-lg text-sm">Outreach Wing</button>
+                                    <button onclick="switchOfficeView('Faculty')" data-office="Faculty" class="office-nav-btn px-4 py-2 rounded-lg text-sm">General/Faculty</button>
+                                </div>
+                                
+                                <div id="office-content-wrapper" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[300px] relative">
+                                    <div id="office-view-Academic" class="office-sub-view active"><h3 class="text-xl font-bold text-[var(--sfadc-blue)] mb-4">Academic Office Members</h3><div id="academic-members-list" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                                    <div id="office-view-Welfare" class="office-sub-view"><h3 class="text-xl font-bold text-[var(--sfadc-brown)] mb-4">Welfare Office Members</h3><div id="welfare-members-list" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                                    <div id="office-view-IMAD" class="office-sub-view"><h3 class="text-xl font-bold text-[var(--sfadc-blue)] mb-4">IMAD Students Union Executive</h3><div id="imad-members-list" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                                    <div id="office-view-Hadeeth" class="office-sub-view"><h3 class="text-xl font-bold text-[var(--sfadc-green-dark)] mb-4">Hadeeth Department Staff</h3><div id="hadeeth-members-list" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                                    <div id="office-view-Outreach" class="office-sub-view"><h3 class="text-xl font-bold text-[var(--sfadc-blue)] mb-4">Outreach Wing Staff</h3><div id="outreach-members-list" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                                    <div id="office-view-Faculty" class="office-sub-view"><h3 class="text-xl font-bold text-slate-800 mb-4">General/Faculty Members</h3><div id="faculty-members-list" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                                    
+                                    <div class="text-center text-slate-500 italic mt-8 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" id="office-loading-indicator">
+                                        Loading members...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-1">
+                                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i data-lucide="user" class="w-5 h-5 text-slate-400"></i> Member Details
+                                </h2>
+                                <div id="edit-member-panel" class="bg-white p-6 rounded-xl shadow-xl border border-slate-200 hidden">
+                                    <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Edit Member</h3>
+                                    
+                                    <form id="editForm" class="space-y-4">
+                                        <input type="hidden" id="edit-doc-id">
+                                        <input type="hidden" id="edit-department">
+                                        <input type="hidden" id="edit-old-photo-url">
+                                        
+                                        <div class="text-center">
+                                            <img id="edit-photo-preview" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 border-4 border-slate-100" src="https://placehold.co/150x150?text=Photo" alt="Member Photo">
+                                            <p id="edit-member-name-preview" class="font-bold text-md text-slate-800"></p>
+                                            <p id="edit-member-designation-preview" class="text-sm text-blue-500"></p>
+                                        </div>
+
+                                        <div>
+                                            <label for="edit-name" class="block text-xs font-medium text-slate-700 mb-1">Name</label>
+                                            <input id="edit-name" class="input-field w-full p-2" required>
+                                        </div>
+                                        <div>
+                                            <label for="edit-designation" class="block text-xs font-medium text-slate-700 mb-1">Designation</label>
+                                            <input id="edit-designation" class="input-field w-full p-2" required>
+                                        </div>
+                                        <!-- Added Duty / Works Edit Input -->
+                                        <div>
+                                            <label for="edit-duty" class="block text-xs font-medium text-slate-700 mb-1">Duty / Works (Optional)</label>
+                                            <input id="edit-duty" class="input-field w-full p-2" placeholder="Specific responsibilities">
+                                        </div>
+                                        <div>
+                                            <label for="edit-photo" class="block text-xs font-medium text-slate-700 mb-1">Update Photo</label>
+                                            <input type="file" id="edit-photo" accept="image/*" class="w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-800 hover:file:bg-slate-300">
+                                        </div>
+
+                                        <button type="submit" id="saveEditBtn" class="w-full bg-[var(--sfadc-green)] text-white py-2 rounded-lg font-bold text-sm hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                            <span>Save Changes</span>
+                                            <div id="edit-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                        </button>
+                                        <button type="button" onclick="deleteMember()" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition-colors">
+                                            Delete Member
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('edit-member-panel').classList.add('hidden'); document.getElementById('edit-placeholder').classList.remove('hidden');" class="w-full bg-slate-300 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-400 transition-colors">
+                                            Cancel
+                                        </button>
+                                    </form>
+                                </div>
+                                <div id="edit-placeholder" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] text-slate-500 flex items-center justify-center">
+                                    Select a member from the list to view/edit details.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="admin-users" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">Admin User Management</h1>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- ADD ADMIN FORM -->
+                        <div class="lg:col-span-2 bg-white p-6 md:p-8 rounded-xl shadow-xl border border-slate-100">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                                <i data-lucide="shield-plus" class="w-6 h-6 text-[var(--sfadc-blue)]"></i> Add New Admin
+                            </h2>
+                            <form id="adminUserForm" class="space-y-4">
+                                <div>
+                                    <label for="adminName" class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                                    <input id="adminName" class="input-field w-full p-3" placeholder="Admin Name" required>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="adminUsername" class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                                        <input id="adminUsername" class="input-field w-full p-3" placeholder="Username" required>
+                                    </div>
+                                    <div>
+                                        <label for="adminPassword" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                        <input type="text" id="adminPassword" class="input-field w-full p-3" placeholder="Password" required>
+                                    </div>
+                                </div>
+                                <button type="submit" id="addAdminBtn" class="w-full bg-[var(--sfadc-blue)] text-white py-3 rounded-lg font-bold hover:bg-[var(--sfadc-blue)]/90 transition-colors flex items-center justify-center gap-2">
+                                    <span>Create Admin User</span>
+                                    <div id="admin-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- EDIT ADMIN PANEL -->
+                        <div class="lg:col-span-1 h-fit sticky top-8">
+                            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="user-cog" class="w-5 h-5 text-slate-400"></i> Edit Admin
+                            </h2>
+                            
+                            <div id="edit-admin-panel" class="bg-white p-6 rounded-xl shadow-xl border border-slate-200 hidden">
+                                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Update Admin</h3>
+                                
+                                <form id="editAdminForm" class="space-y-4">
+                                    <input type="hidden" id="edit-admin-doc-id">
+                                    
+                                    <div>
+                                        <label for="edit-admin-name" class="block text-xs font-medium text-slate-700 mb-1">Name</label>
+                                        <input id="edit-admin-name" class="input-field w-full p-2" required>
+                                    </div>
+                                    <div>
+                                        <label for="edit-admin-username" class="block text-xs font-medium text-slate-700 mb-1">Username</label>
+                                        <input id="edit-admin-username" class="input-field w-full p-2" required>
+                                    </div>
+                                    <div>
+                                        <label for="edit-admin-password" class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+                                        <input type="text" id="edit-admin-password" class="input-field w-full p-2" required>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2 pt-2">
+                                        <button type="submit" id="saveAdminEditBtn" class="w-full bg-[var(--sfadc-green)] text-white py-2 rounded-lg font-bold text-sm hover:bg-[var(--sfadc-green)]/90 transition-colors flex items-center justify-center gap-2">
+                                            <span>Save Changes</span>
+                                            <div id="edit-admin-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
+                                        </button>
+                                        <button type="button" onclick="deleteAdminUser()" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition-colors">
+                                            Delete Admin
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('edit-admin-panel').classList.add('hidden'); document.getElementById('edit-admin-placeholder').classList.remove('hidden');" class="w-full bg-slate-300 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-400 transition-colors">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="edit-admin-placeholder" class="bg-white p-6 rounded-xl shadow border border-slate-100 min-h-[150px] text-slate-500 flex items-center justify-center text-center text-sm">
+                                Select an admin to edit.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                            <i data-lucide="users-round" class="w-6 h-6 text-slate-400"></i> Existing Admins
+                        </h2>
+                        <!-- LIST CONTAINER -->
+                        <div id="admin-users-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <p class="text-slate-500 italic col-span-full flex items-center justify-center py-6">
+                                <span class="loading-spinner w-5 h-5 border-2 border-slate-300 border-t-[var(--sfadc-blue)] rounded-full animate-spin mr-2"></span>
+                                Loading admins...
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="contact-messages" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">Contact Messages</h1>
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-xl border border-slate-100">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                            <i data-lucide="mail" class="w-6 h-6 text-[var(--sfadc-gold)]"></i> Messages Received (<span id="message-count">0</span>)
+                        </h2>
+                        <div id="messages" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                            <p class="text-slate-500 italic">Loading messages...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="settings" class="admin-view">
+                    <h1 class="text-3xl font-bold text-[var(--sfadc-dark-bg)] mb-6">Settings & Page Design</h1>
+                    
+                    <div class="grid grid-cols-1 gap-8">
+                        
+                        <!-- Video & Media Settings -->
+                        <div class="bg-white p-6 rounded-xl shadow-xl border border-slate-100 border-t-4 border-[var(--sfadc-gold)]">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                                <i data-lucide="video" class="w-6 h-6 text-[var(--sfadc-gold)]"></i> Homepage Media
+                            </h2>
+                            <div class="space-y-6">
+                                <div class="bg-slate-50 p-4 rounded-lg border border-dashed border-slate-300">
+                                    <label for="heroVideo" class="block text-sm font-bold text-slate-700 mb-2">Hero Video URL</label>
+                                    <input id="heroVideo" class="input-field w-full p-3 bg-white" placeholder="Paste YouTube or MP4 URL here">
+                                    <p class="text-xs text-slate-500 mt-2">This video will play in the background of the homepage hero section.</p>
+                                </div>
+                                
+                                <button id="saveHeroVideoBtn" class="w-full bg-[var(--sfadc-gold)] text-black py-4 rounded-lg font-extrabold hover:bg-amber-300 transition-colors shadow-md">
+                                    Update Hero Video
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, Timestamp, doc, updateDoc, deleteDoc, getDoc, setDoc, getDocs }
+    from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, initializeAuth, inMemoryPersistence } 
+    from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    // --- FALLBACK AND CLOUDINARY CONFIG ---
+    const FALLBACK_FIREBASE_CONFIG = {
+        apiKey: "AIzaSyCpkXW-Y12WP-zn4X25dEe0gaInnjfg-3E",
+        authDomain: "college-a54be.firebaseapp.com",
+        projectId: "college-a54be",
+        storageBucket: "college-a54be.firebasestorage.app",
+        messagingSenderId: "789306619142",
+        appId: "1:789306619142:web:c2128052fe9ab4e094da87",
+    };
+    const CLOUD_NAME = "dzmyxdpyb";
+    const UPLOAD_PRESET = "college";
+    
+    // --- CANVAS GLOBAL VARIABLES ---
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : JSON.stringify(FALLBACK_FIREBASE_CONFIG));
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'college-a54be'; 
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db;
+    let auth;
+    let userId;
+    let globalMembersData = {}; 
+    let globalNewsData = {}; 
+    let globalAboutMembers = {}; 
+    let globalEventsData = {}; 
+    let globalAdminsData = {}; // NEW: Cache for admins
+
+    const msgBox = document.getElementById("messages");
+    const messageCount = document.getElementById("message-count");
+    const dashMessageCount = document.getElementById("dash-message-count");
+    const dashNewsCount = document.getElementById("dash-news-count");
+    const dashStaffCount = document.getElementById("dash-staff-count");
+    
+    const newsListContainer = document.getElementById("news-posts-list");
+    const eventsListContainer = document.getElementById("upcoming-events-list"); 
+    const adminListContainer = document.getElementById("admin-users-list"); // NEW
+    const authStatus = document.getElementById("auth-status");
+    const adminInterface = document.getElementById("admin-interface");
+    const officeLoadingIndicator = document.getElementById("office-loading-indicator");
+    const editMemberPanel = document.getElementById('edit-member-panel');
+    const editPlaceholder = document.getElementById('edit-placeholder');
+    const editNewsPanel = document.getElementById('edit-news-panel');
+    const editNewsPlaceholder = document.getElementById('edit-news-placeholder');
+    const editEventPanel = document.getElementById('edit-event-panel'); 
+    const editEventPlaceholder = document.getElementById('edit-event-placeholder'); 
+    const editAdminPanel = document.getElementById('edit-admin-panel'); // NEW
+    const editAdminPlaceholder = document.getElementById('edit-admin-placeholder'); // NEW
+    const heroVideoInput = document.getElementById('heroVideo');
+    
+    const DEPARTMENTS = ["Academic", "Welfare", "IMAD", "Hadeeth", "Outreach", "Faculty"];
+
+
+    // --- UTILITIES (Image Upload via Cloudinary) ---
+    async function uploadImage(file) {
+        if (!file) return null;
+        const form = new FormData();
+        form.append("file", file);
+        form.append("upload_preset", UPLOAD_PRESET);
+        const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+        try {
+            const res = await fetch(url, { method: "POST", body: form });
+            if (!res.ok) throw new Error("Cloudinary image upload failed. Check network or preset config.");
+            const data = await res.json();
+            return data.secure_url;
+        } catch (error) {
+            console.error("Cloudinary Error:", error);
+            return null; 
+        }
+    }
+    
+    // --- UTILITIES (Color Inputs Toggle) ---
+    window.toggleColorInputs = (prefix) => {
+        const checkboxId = prefix === 'add' ? 'useCustomColors' : 'edit-useCustomColors';
+        const inputsId = prefix === 'add' ? 'colorInputs' : 'edit-colorInputs';
+        
+        const checkbox = document.getElementById(checkboxId);
+        const inputsDiv = document.getElementById(inputsId);
+        
+        if (checkbox.checked) {
+            inputsDiv.classList.remove('hidden');
+        } else {
+            inputsDiv.classList.add('hidden');
+        }
+    }
+
+    // --- NAVIGATION LOGIC ---
+    window.switchView = (viewId) => {
+        localStorage.setItem('activeAdminView', viewId);
+
+        document.querySelectorAll('.nav-link-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.view === viewId) {
+                btn.classList.add('active');
+            }
+        });
+
+        document.querySelectorAll('.admin-view').forEach(view => {
+            view.classList.remove('active');
+        });
+        document.getElementById(viewId).classList.add('active');
+
+        // Hide all edit panels
+        editMemberPanel.classList.add('hidden');
+        editPlaceholder.classList.remove('hidden');
+        editNewsPanel.classList.add('hidden');
+        editNewsPlaceholder.classList.remove('hidden');
+        document.getElementById('edit-about-panel').classList.add('hidden');
+        document.getElementById('edit-about-placeholder').classList.remove('hidden');
+        editEventPanel.classList.add('hidden'); 
+        editEventPlaceholder.classList.remove('hidden'); 
+        editAdminPanel.classList.add('hidden'); // NEW
+        editAdminPlaceholder.classList.remove('hidden'); // NEW
+
+        if (viewId === 'contact-messages' && !msgBox.dataset.loaded) {
+            loadMessages();
+            msgBox.dataset.loaded = 'true';
+        } else if (viewId === 'staff-management') {
+            const activeOffice = document.querySelector('.office-nav-btn.active')?.dataset.office || 'Academic';
+            loadOfficeMembers(activeOffice);
+        } else if (viewId === 'news-events') {
+             loadNewsPosts();
+        } else if (viewId === 'upcoming-events') { 
+             loadUpcomingEvents();
+        } else if (viewId === 'about-us') {
+             loadAboutMembers('about_management');
+        } else if (viewId === 'admin-users') { // NEW
+             loadAdmins();
+        } else if (viewId === 'settings') {
+             loadSettings();
+        }
+    };
+    
+    window.toggleMobileMenu = () => {
+        document.getElementById('mobile-menu-overlay').classList.toggle('hidden');
+        document.body.style.overflow = document.getElementById('mobile-menu-overlay').classList.contains('hidden') ? 'auto' : 'hidden';
+    };
+
+    window.switchAboutView = (collectionName) => {
+        const baseName = collectionName;
+        const activeCollection = `about_${baseName}`;
+        
+        document.querySelectorAll('.about-nav-btn').forEach(btn => {
+            btn.classList.remove('active', 'text-white', 'bg-[var(--sfadc-blue)]');
+            btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            if (btn.dataset.about === baseName) {
+                btn.classList.add('active', 'text-white', 'bg-[var(--sfadc-blue)]');
+                btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            }
+        });
+
+        document.querySelectorAll('.about-sub-view').forEach(view => {
+            view.classList.add('hidden');
+            if (view.id === `about-view-${baseName}`) {
+                view.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('edit-about-panel').classList.add('hidden');
+        document.getElementById('edit-about-placeholder').classList.remove('hidden');
+        
+        loadAboutMembers(activeCollection);
+    };
+
+    
+    window.switchOfficeView = (officeName) => {
+        document.querySelectorAll('.office-nav-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-blue-50', 'text-blue-700');
+            btn.classList.add('office-nav-btn');
+            if (btn.dataset.office === officeName) {
+                btn.classList.add('active');
+            }
+        });
+
+        document.querySelectorAll('.office-sub-view').forEach(view => {
+            view.classList.remove('active');
+        });
+        document.getElementById(`office-view-${officeName}`).classList.add('active');
+        
+        editMemberPanel.classList.add('hidden');
+        editPlaceholder.classList.remove('hidden');
+
+        loadOfficeMembers(officeName);
+    };
+
+    window.logoutAdmin = () => {
+        sessionStorage.removeItem('isSFADCAdmin');
+        localStorage.removeItem('activeAdminView'); 
+        window.location.href = 'login.html';
+    };
+
+
+    // --- DASHBOARD COUNTING FUNCTION ---
+    async function getStaffCount() {
+        if (!db) return;
+        try {
+            const path = collection(db, 'artifacts', appId, 'public', 'data', 'offices');
+            const snapshot = await getDocs(path);
+            const count = snapshot.size;
+            dashStaffCount.innerText = count.toString();
+        } catch (error) {
+            console.error("Error fetching staff count:", error);
+            dashStaffCount.innerText = "Error";
+        }
+    }
+
+
+    // --- FIREBASE INITIALIZATION & LOGIC-BASED AUTH ---
+    async function initializeFirebase() {
+        if (sessionStorage.getItem('isSFADCAdmin') !== 'true') {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (Object.keys(firebaseConfig).length === 0) {
+            authStatus.innerText = "Error: Firebase configuration is missing. Admin functions disabled.";
+            authStatus.classList.remove('hidden');
+            adminInterface.classList.add('hidden');
+            return;
+        }
+        
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            
+            auth = initializeAuth(app, { persistence: inMemoryPersistence });
+            await signInAnonymously(auth); 
+            
+            userId = auth.currentUser.uid;
+            
+            authStatus.classList.add('hidden');
+            adminInterface.classList.remove('hidden');
+
+            setupForms();
+            loadMessages(true); 
+            loadNewsPosts(true); 
+            loadOfficeMembers('Academic'); 
+            loadUpcomingEvents(true); 
+            loadAdmins(true); // NEW: Load admins silently
+            loadSettings(true);
+            
+            getStaffCount();
+            
+            const savedView = localStorage.getItem('activeAdminView') || 'dashboard';
+            switchView(savedView); 
+
+        } catch (error) {
+            console.error("Firebase Init Error (Anonymous Sign-in):", error);
+            window.location.href = 'login.html';
+        }
+    }
+
+    // --- DATA LOADING ---
+    function loadAboutMembers(collectionName) {
+        if (!db) return;
+        
+        const listName = collectionName.split('_')[1]; 
+        const listContainer = document.getElementById(`${listName}-members-list`);
+        
+        listContainer.innerHTML = `<p class="text-slate-500 italic">Loading ${listName} members...</p>`;
+        
+        const path = collection(db, 'artifacts', appId, 'public', 'data', collectionName);
+        const q = query(path, orderBy('order', 'asc'));
+        
+        globalAboutMembers[collectionName] = {};
+
+        onSnapshot(q, (snapshot) => {
+            listContainer.innerHTML = ''; 
+
+            if (snapshot.empty) {
+                listContainer.innerHTML = `<p class="text-slate-500 py-4">No ${listName} members listed yet.</p>`;
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const m = doc.data();
+                const docId = doc.id;
+                globalAboutMembers[collectionName][docId] = { ...m, docId, collectionName };
+                
+                const phoneDisplay = m.phone ? `<p class="text-xs text-slate-400">Phone: ${m.phone}</p>` : '';
+
+                const cardHtml = `
+                    <div class="bg-slate-50 p-3 rounded-lg shadow-sm border border-slate-200 flex items-center justify-between hover:bg-white transition-all">
+                        <div class="flex items-center gap-3">
+                            <img src="${m.photo || 'https://placehold.co/50x50/e2e8f0/1e293b?text=P'}" onerror="this.onerror=null; this.src='https://placehold.co/50x50/e2e8f0/1e293b?text=P';" alt="${m.name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">${m.name}</h4>
+                                <p class="text-xs text-[var(--sfadc-blue)] font-medium">${m.designation}</p>
+                                ${phoneDisplay}
+                            </div>
+                        </div>
+                        <button onclick="startAboutEdit('${docId}', '${collectionName}')" class="text-blue-500 hover:text-blue-700 p-1 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors flex-shrink-0">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.innerHTML += cardHtml;
+            });
+            lucide.createIcons(); 
+        }, (error) => {
+            console.error(`Error loading ${collectionName} members:`, error);
+            listContainer.innerHTML = `<p class="text-red-500 py-4">Error loading members: ${error.message}</p>`;
+        });
+    }
+
+    function loadMessages(silent = false) {
+        if (!db) return;
+        const path = `artifacts/${appId}/public/data/contact_messages`;
+        const q = query(collection(db, path), orderBy("timestamp", "desc"));
+        
+        if (!silent) {
+            msgBox.innerHTML = '<p class="text-slate-500 italic p-4">Loading messages...</p>';
+        }
+
+        onSnapshot(q, (snapshot) => {
+            const count = snapshot.size;
+            messageCount.innerText = count;
+            dashMessageCount.innerText = count;
+
+            if (silent) return;
+
+            msgBox.innerHTML = '';
+            if (snapshot.empty) {
+                msgBox.innerHTML = '<p class="text-slate-500 p-4 border border-slate-200 rounded-lg">No contact messages received yet.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const m = doc.data();
+                const timestamp = m.timestamp?.toDate ? m.timestamp.toDate().toLocaleString() : (m.timestamp ? new Date(m.timestamp).toLocaleString() : 'N/A');
+
+                const cardHtml = `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center text-sm mb-2">
+                            <span class="font-bold text-[var(--sfadc-dark-bg)]">${m.firstName || 'N/A'} ${m.lastName || ''}</span>
+                            <span class="text-xs text-slate-500">${timestamp}</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-2">
+                            <span class="font-medium">Subject:</span> ${m.subject || 'General Inquiry'}
+                        </p>
+                        <p class="text-xs text-slate-600 mb-3">${m.message}</p>
+                        <span class="text-xs text-slate-400">Email: ${m.email}</span>
+                    </div>
+                `;
+                msgBox.innerHTML += cardHtml;
+            });
+        }, (error) => {
+            console.error("Error listening to contact messages:", error);
+            if (!silent) {
+                msgBox.innerHTML = `<p class="text-red-500">Error loading messages: ${error.message}</p>`;
+            }
+        });
+    }
+
+    function loadNewsPosts(silent = false) {
+        if (!db) return;
+
+        const path = collection(db, 'artifacts', appId, 'public', 'data', 'news');
+        const q = query(path, orderBy('date', 'desc')); 
+
+        if (!silent) {
+            newsListContainer.innerHTML = `<p class="text-slate-500 italic flex items-center justify-center py-6">
+                <div class="w-5 h-5 border-2 border-slate-300 border-t-[var(--sfadc-blue)] rounded-full animate-spin mr-3 loading-spinner"></div>
+                Loading published posts...
+            </p>`;
+        }
+
+        onSnapshot(q, (snapshot) => {
+            const count = snapshot.size;
+            dashNewsCount.innerText = count;
+
+            if (silent) return;
+
+            newsListContainer.innerHTML = '';
+            globalNewsData = {};
+
+            if (snapshot.empty) {
+                newsListContainer.innerHTML = '<p class="text-slate-500 py-4">No news posts published yet.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const n = doc.data();
+                const docId = doc.id;
+                globalNewsData[docId] = { ...n, docId };
+                
+                const displayDate = n.date ? new Date(n.date + 'T00:00:00').toLocaleDateString() : 'N/A';
+                
+                let catColor = n.category === 'academics' ? 'text-blue-500' : 
+                               n.category === 'union' ? 'text-green-500' : 
+                               n.category === 'events' ? 'text-red-500' : 'text-slate-500';
+                               
+                const spotlightBadge = n.isSpotlight ? 
+                    `<span class="bg-[var(--sfadc-gold)] text-black text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm">
+                        <i data-lucide="star" class="w-3 h-3 fill-current"></i> Spotlight
+                    </span>` : '';
+
+                const newsHtml = `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg shadow-sm flex items-center justify-between">
+                        <div class="flex items-start gap-4 flex-1">
+                            <img src="${n.image || 'https://placehold.co/80x50?text=Img'}" onerror="this.onerror=null; this.src='https://placehold.co/80x50?text=Img';" class="w-20 h-12 object-cover rounded-md flex-shrink-0">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h4 class="font-bold text-sm text-slate-800 line-clamp-1">${n.title}</h4>
+                                    ${spotlightBadge}
+                                </div>
+                                <p class="text-xs text-slate-500">Category: <span class="${catColor} font-medium">${n.category}</span></p>
+                                <p class="text-xs text-slate-400">Date: ${displayDate}</p>
+                            </div>
+                        </div>
+                        <button onclick="startNewsEdit('${docId}')" class="text-blue-500 hover:text-blue-700 p-1 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors flex-shrink-0">
+                            <i data-lucide="edit" class="w-4 h-4"></i> Edit
+                        </button>
+                    </div>
+                `;
+                newsListContainer.insertAdjacentHTML('beforeend', newsHtml);
+            });
+            lucide.createIcons();
+        }, (error) => {
+            console.error("Error loading news posts:", error);
+            if (!silent) {
+                newsListContainer.innerHTML = `<p class="text-red-500 py-4">Error loading news: ${error.message}</p>`;
+            }
+        });
+    }
+
+    // --- UPCOMING EVENTS LOGIC ---
+    function loadUpcomingEvents(silent = false) {
+        if (!db) return;
+
+        const path = collection(db, 'artifacts', appId, 'public', 'data', 'upcoming_events');
+        const q = query(path, orderBy('date', 'asc')); 
+
+        if (!silent) {
+            eventsListContainer.innerHTML = `<p class="text-slate-500 italic flex items-center justify-center py-6 col-span-full">
+                <span class="w-5 h-5 border-2 border-slate-300 border-t-[var(--sfadc-blue)] rounded-full animate-spin mr-3 loading-spinner"></span>
+                Loading upcoming events...
+            </p>`;
+        }
+
+        onSnapshot(q, (snapshot) => {
+            if (silent && document.getElementById('upcoming-events').classList.contains('active')) {
+                silent = false;
+            } else if (silent) {
+                return;
+            }
+
+            eventsListContainer.innerHTML = '';
+            globalEventsData = {};
+
+            if (snapshot.empty) {
+                eventsListContainer.innerHTML = '<p class="text-slate-500 py-4 col-span-full text-center">No upcoming events scheduled.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const e = doc.data();
+                const docId = doc.id;
+                globalEventsData[docId] = { ...e, docId };
+                
+                const dateParts = e.date ? e.date.split('-') : ['2000', '01', '01'];
+                const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
+                const day = dateParts[2];
+                const year = dateParts[0]; 
+                
+                let colorClass = "";
+                let inlineStyle = "";
+
+                if (e.bgColor && e.textColor) {
+                     inlineStyle = `background-color: ${e.bgColor}; color: ${e.textColor};`;
+                } else {
+                    const monthIndex = parseInt(dateParts[1]);
+                    if(monthIndex % 4 === 0) colorClass = "bg-red-50 text-red-600";
+                    else if(monthIndex % 4 === 1) colorClass = "bg-blue-50 text-blue-600";
+                    else if(monthIndex % 4 === 2) colorClass = "bg-green-50 text-green-600";
+                    else colorClass = "bg-amber-50 text-amber-600";
+                }
+
+
+                const eventHtml = `
+                    <div class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:shadow-md transition bg-white relative group">
+                        <div style="${inlineStyle}" class="${colorClass} rounded-lg p-2 text-center min-w-[70px] h-auto flex flex-col justify-center items-center">
+                            <span class="text-[11px] font-bold uppercase block tracking-wide opacity-80">${month}</span>
+                            <span class="text-2xl font-extrabold block leading-none my-1">${day}</span>
+                            <span class="text-[10px] font-bold block leading-none opacity-80">${year}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-slate-800 text-sm md:text-base truncate">${e.title}</h4>
+                            <p class="text-xs text-slate-500 truncate">${e.location}</p>
+                        </div>
+                        <button onclick="startEventEdit('${docId}')" class="opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 p-1.5 bg-slate-100 rounded-full hover:bg-slate-200 text-slate-500">
+                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+                eventsListContainer.insertAdjacentHTML('beforeend', eventHtml);
+            });
+            lucide.createIcons();
+        }, (error) => {
+            console.error("Error loading upcoming events:", error);
+            if (!silent) {
+                eventsListContainer.innerHTML = `<p class="text-red-500 py-4 col-span-full">Error loading events: ${error.message}</p>`;
+            }
+        });
+    }
+
+    // --- NEW: LOAD ADMINS ---
+    function loadAdmins(silent = false) {
+        if (!db) return;
+
+        const path = collection(db, 'artifacts', appId, 'public', 'data', 'admins');
+        const q = query(path); 
+
+        if (!silent) {
+            adminListContainer.innerHTML = `<p class="text-slate-500 italic col-span-full flex items-center justify-center py-6">
+                <span class="loading-spinner w-5 h-5 border-2 border-slate-300 border-t-[var(--sfadc-blue)] rounded-full animate-spin mr-2"></span>
+                Loading admins...
+            </p>`;
+        }
+
+        onSnapshot(q, (snapshot) => {
+            if (silent && document.getElementById('admin-users').classList.contains('active')) {
+                silent = false;
+            } else if (silent) {
+                return;
+            }
+
+            adminListContainer.innerHTML = '';
+            globalAdminsData = {};
+
+            if (snapshot.empty) {
+                adminListContainer.innerHTML = '<p class="text-slate-500 py-4 col-span-full text-center">No admins found.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const admin = doc.data();
+                const docId = doc.id;
+                globalAdminsData[docId] = { ...admin, docId };
+
+                const adminHtml = `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 hover:shadow-md transition relative group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg">
+                                ${admin.name ? admin.name.charAt(0).toUpperCase() : 'A'}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm md:text-base">${admin.name}</h4>
+                                <p class="text-xs text-slate-500">@${admin.username}</p>
+                                <p class="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full w-fit mt-1 border border-green-100">Role: ${admin.role}</p>
+                            </div>
+                        </div>
+                        <button onclick="startAdminEdit('${docId}')" class="opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 p-1.5 bg-slate-100 rounded-full hover:bg-slate-200 text-slate-500">
+                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+                adminListContainer.insertAdjacentHTML('beforeend', adminHtml);
+            });
+            lucide.createIcons();
+        }, (error) => {
+            console.error("Error loading admins:", error);
+            if (!silent) {
+                adminListContainer.innerHTML = `<p class="text-red-500 py-4 col-span-full">Error loading admins: ${error.message}</p>`;
+            }
+        });
+    }
+
+
+    function loadOfficeMembers(department) {
+        if (!db) return;
+        
+        const listContainer = document.getElementById(`${department.toLowerCase()}-members-list`);
+        if (!listContainer) return;
+
+        listContainer.innerHTML = '';
+        officeLoadingIndicator.classList.remove('hidden');
+        officeLoadingIndicator.innerText = `Loading members for ${department}...`;
+        
+        const path = collection(db, 'artifacts', appId, 'public', 'data', 'offices');
+        const q = query(path, where('department', '==', department));
+        
+        globalMembersData[department] = {}; 
+
+        onSnapshot(q, (snapshot) => {
+            listContainer.innerHTML = ''; 
+            officeLoadingIndicator.classList.add('hidden');
+            
+            getStaffCount();
+
+            if (snapshot.empty) {
+                listContainer.innerHTML = `<p class="col-span-full text-slate-500 py-4">No members listed for the ${department} office yet.</p>`;
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const m = doc.data();
+                const docId = doc.id;
+                globalMembersData[department][docId] = { ...m, docId };
+
+                const dutyDisplay = m.duty ? `<p class="text-xs text-slate-500 mt-0.5 italic">${m.duty}</p>` : '';
+
+                const cardHtml = `
+                    <div class="bg-slate-50 p-4 rounded-lg shadow-sm border border-slate-200 flex items-center justify-between hover:bg-white transition-all">
+                        <div class="flex items-center gap-3">
+                            <img src="${m.photo || 'https://placehold.co/50x50/e2e8f0/1e293b?text=P'}" onerror="this.onerror=null; this.src='https://placehold.co/50x50/e2e8f0/1e293b?text=P';" alt="${m.name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">${m.name}</h4>
+                                <p class="text-xs text-[var(--sfadc-blue)] font-medium">${m.designation}</p>
+                                ${dutyDisplay}
+                            </div>
+                        </div>
+                        <button onclick="startEdit('${docId}', '${department}')" class="text-blue-500 hover:text-blue-700 p-1 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors flex-shrink-0">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.innerHTML += cardHtml;
+            });
+            lucide.createIcons(); 
+            
+        }, (error) => {
+            console.error(`Error loading ${department} members:`, error);
+            officeLoadingIndicator.classList.add('hidden');
+            listContainer.innerHTML = `<p class="col-span-full text-red-500 py-4">Error loading members: ${error.message}</p>`;
+        });
+    }
+
+    // --- SETTINGS LOGIC ---
+    const SETTINGS_DOC_REF = (db) => doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
+
+    async function loadSettings(silent = false) {
+        if (!db) return;
+        try {
+            const docSnap = await getDoc(SETTINGS_DOC_REF(db));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                heroVideoInput.value = data.heroVideo || '';
+            }
+        } catch (error) {
+            console.error("Error loading settings:", error);
+            if (!silent) alert(`Error: Failed to load settings. ${error.message}`);
+        }
+    }
+
+    async function saveHeroVideo() {
+        if (!db) return;
+        try {
+            const videoUrl = heroVideoInput.value.trim();
+            
+            const updateData = {
+                heroVideo: videoUrl
+            };
+            
+            await setDoc(SETTINGS_DOC_REF(db), updateData, { merge: true });
+            alert(`Hero Video URL successfully updated to: ${videoUrl || '[Empty/Removed]'}`);
+        } catch (error) {
+            console.error("Error saving hero video URL:", error);
+            alert(`Error: Failed to update Hero Video URL. ${error.message}`);
+        }
+    }
+
+
+    // --- MEMBER EDIT & DELETE LOGIC ---
+    window.startEdit = (docId, department) => {
+        const member = globalMembersData[department][docId];
+        if (!member) {
+            alert("Member data not found for editing.");
+            return;
+        }
+
+        document.getElementById('edit-doc-id').value = docId;
+        document.getElementById('edit-department').value = department;
+        document.getElementById('edit-old-photo-url').value = member.photo || '';
+        document.getElementById('edit-name').value = member.name;
+        document.getElementById('edit-designation').value = member.designation;
+        document.getElementById('edit-duty').value = member.duty || ''; // Populate duty
+        document.getElementById('edit-photo-preview').src = member.photo || 'https://placehold.co/150x150?text=Photo';
+        document.getElementById('edit-member-name-preview').innerText = member.name;
+        document.getElementById('edit-member-designation-preview').innerText = member.designation;
+        document.getElementById('edit-photo').value = ''; 
+
+        editPlaceholder.classList.add('hidden');
+        editMemberPanel.classList.remove('hidden');
+        
+        editMemberPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docId = document.getElementById('edit-doc-id').value;
+        const department = document.getElementById('edit-department').value;
+        const oldPhotoUrl = document.getElementById('edit-old-photo-url').value;
+        const name = document.getElementById('edit-name').value;
+        const designation = document.getElementById('edit-designation').value;
+        const duty = document.getElementById('edit-duty').value; // Get duty value
+        const photoFile = document.getElementById('edit-photo').files[0];
+
+        const btn = document.getElementById('saveEditBtn');
+        const spinner = document.getElementById('edit-spinner');
+        
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            let newPhotoUrl = oldPhotoUrl;
+
+            if (photoFile) {
+                newPhotoUrl = await uploadImage(photoFile);
+                if (!newPhotoUrl) throw new Error("New image upload failed.");
+            }
+
+            const updateData = {
+                name: name,
+                designation: designation,
+                duty: duty,
+                photo: newPhotoUrl
+            };
+            
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'offices', docId);
+            await updateDoc(docRef, updateData);
+
+            alert(`Successfully updated ${name} in ${department}.`);
+            editMemberPanel.classList.add('hidden'); 
+            editPlaceholder.classList.remove('hidden');
+            
+            getStaffCount();
+
+        } catch (error) {
+            console.error("Error updating member:", error);
+            alert(`Error: Failed to save changes. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    });
+
+    window.deleteMember = async () => {
+        const docId = document.getElementById('edit-doc-id').value;
+        const department = document.getElementById('edit-department').value;
+        const name = document.getElementById('edit-name').value;
+
+        console.warn(`Attempting to delete ${name} from ${department}. A real app should use a custom confirmation modal.`);
+        
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'offices', docId);
+            await deleteDoc(docRef);
+
+            alert(`${name} has been successfully deleted.`);
+            editMemberPanel.classList.add('hidden'); 
+            editPlaceholder.classList.remove('hidden');
+            
+            getStaffCount();
+
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            alert(`Error: Failed to delete member. ${error.message}`);
+        }
+    };
+
+
+    // --- NEWS EDIT & DELETE LOGIC ---
+    window.startNewsEdit = (docId) => {
+        const news = globalNewsData[docId];
+        if (!news) {
+            alert("News data not found for editing.");
+            return;
+        }
+
+        document.getElementById('edit-news-doc-id').value = docId;
+        document.getElementById('edit-news-old-photo-url').value = news.image || '';
+        document.getElementById('edit-news-title').value = news.title;
+        document.getElementById('edit-news-desc').value = news.description;
+        document.getElementById('edit-news-date').value = news.date || ''; 
+        document.getElementById('edit-news-category').value = news.category;
+        document.getElementById('edit-news-spotlight').checked = news.isSpotlight || false; 
+        document.getElementById('edit-news-photo-preview').src = news.image || 'https://placehold.co/300x150?text=Image';
+        document.getElementById('edit-news-image').value = ''; 
+
+        editNewsPlaceholder.classList.add('hidden');
+        editNewsPanel.classList.remove('hidden');
+        
+        editNewsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.getElementById('editNewsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docId = document.getElementById('edit-news-doc-id').value;
+        const oldPhotoUrl = document.getElementById('edit-news-old-photo-url').value;
+        const title = document.getElementById('edit-news-title').value;
+        const description = document.getElementById('edit-news-desc').value;
+        const date = document.getElementById('edit-news-date').value; 
+        const category = document.getElementById('edit-news-category').value;
+        const isSpotlight = document.getElementById('edit-news-spotlight').checked; 
+        const photoFile = document.getElementById('edit-news-image').files[0];
+
+        const btn = document.getElementById('saveNewsEditBtn');
+        const spinner = document.getElementById('edit-news-spinner');
+        
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            let newPhotoUrl = oldPhotoUrl;
+
+            if (photoFile) {
+                newPhotoUrl = await uploadImage(photoFile);
+                if (!newPhotoUrl) throw new Error("New image upload failed.");
+            }
+
+            const updateData = {
+                title: title,
+                description: description,
+                date: date, 
+                category: category,
+                isSpotlight: isSpotlight,
+                image: newPhotoUrl
+            };
+            
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'news', docId);
+            await updateDoc(docRef, updateData);
+
+            alert(`Successfully updated news post: "${title}".`);
+            editNewsPanel.classList.add('hidden'); 
+            editNewsPlaceholder.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Error updating news post:", error);
+            alert(`Error: Failed to save news changes. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    });
+
+    window.deleteNewsPost = async () => {
+        const docId = document.getElementById('edit-news-doc-id').value;
+        const title = document.getElementById('edit-news-title').value;
+
+        console.warn(`Attempting to delete news post: "${title}". A real app should use a custom confirmation modal.`);
+
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'news', docId);
+            await deleteDoc(docRef);
+
+            alert(`News post "${title}" has been successfully deleted.`);
+            editNewsPanel.classList.add('hidden'); 
+            editNewsPlaceholder.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Error deleting news post:", error);
+            alert(`Error: Failed to delete news post. ${error.message}`);
+        }
+    };
+
+
+    // --- EVENT EDIT & DELETE LOGIC ---
+    window.startEventEdit = (docId) => {
+        const evt = globalEventsData[docId];
+        if (!evt) {
+            alert("Event data not found.");
+            return;
+        }
+
+        document.getElementById('edit-event-doc-id').value = docId;
+        document.getElementById('edit-event-date').value = evt.date;
+        document.getElementById('edit-event-title').value = evt.title;
+        document.getElementById('edit-event-location').value = evt.location;
+        
+        // Populate color fields
+        const useCustom = (evt.bgColor && evt.textColor);
+        document.getElementById('edit-useCustomColors').checked = useCustom;
+        
+        const colorInputs = document.getElementById('edit-colorInputs');
+        if (useCustom) {
+            colorInputs.classList.remove('hidden');
+            document.getElementById('edit-eventBgColor').value = evt.bgColor;
+            document.getElementById('edit-eventTextColor').value = evt.textColor;
+        } else {
+            colorInputs.classList.add('hidden');
+            document.getElementById('edit-eventBgColor').value = "#004875"; // Reset default
+            document.getElementById('edit-eventTextColor').value = "#ffffff";
+        }
+
+
+        editEventPlaceholder.classList.add('hidden');
+        editEventPanel.classList.remove('hidden');
+        
+        editEventPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.getElementById('editEventForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docId = document.getElementById('edit-event-doc-id').value;
+        const date = document.getElementById('edit-event-date').value;
+        const title = document.getElementById('edit-event-title').value;
+        const location = document.getElementById('edit-event-location').value;
+        
+        const useCustom = document.getElementById('edit-useCustomColors').checked;
+        const bgColor = document.getElementById('edit-eventBgColor').value;
+        const textColor = document.getElementById('edit-eventTextColor').value;
+
+        const btn = document.getElementById('saveEventEditBtn');
+        const spinner = document.getElementById('edit-event-spinner');
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            const updateData = {
+                date: date,
+                title: title,
+                location: location,
+                bgColor: useCustom ? bgColor : null,
+                textColor: useCustom ? textColor : null
+            };
+            
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'upcoming_events', docId);
+            await updateDoc(docRef, updateData);
+
+            alert(`Successfully updated event: "${title}".`);
+            editEventPanel.classList.add('hidden'); 
+            editEventPlaceholder.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Error updating event:", error);
+            alert(`Error: Failed to save changes. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    });
+
+    window.deleteUpcomingEvent = async () => {
+        const docId = document.getElementById('edit-event-doc-id').value;
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'upcoming_events', docId);
+            await deleteDoc(docRef);
+            alert(`Event successfully deleted.`);
+            editEventPanel.classList.add('hidden'); 
+            editEventPlaceholder.classList.remove('hidden');
+        } catch (error) {
+            console.error("Error deleting event:", error);
+            alert(`Error: Failed to delete event. ${error.message}`);
+        }
+    };
+
+    // --- NEW: ADMIN EDIT & DELETE LOGIC ---
+    window.startAdminEdit = (docId) => {
+        const admin = globalAdminsData[docId];
+        if (!admin) {
+            alert("Admin data not found.");
+            return;
+        }
+
+        document.getElementById('edit-admin-doc-id').value = docId;
+        document.getElementById('edit-admin-name').value = admin.name;
+        document.getElementById('edit-admin-username').value = admin.username;
+        document.getElementById('edit-admin-password').value = admin.password;
+
+        editAdminPlaceholder.classList.add('hidden');
+        editAdminPanel.classList.remove('hidden');
+        
+        editAdminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.getElementById('editAdminForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docId = document.getElementById('edit-admin-doc-id').value;
+        const name = document.getElementById('edit-admin-name').value;
+        const username = document.getElementById('edit-admin-username').value;
+        const password = document.getElementById('edit-admin-password').value;
+
+        const btn = document.getElementById('saveAdminEditBtn');
+        const spinner = document.getElementById('edit-admin-spinner');
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            const updateData = {
+                name: name,
+                username: username,
+                password: password,
+                role: 'admin' // Ensure role stays admin
+            };
+            
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'admins', docId);
+            await updateDoc(docRef, updateData);
+
+            alert(`Successfully updated admin: "${name}".`);
+            editAdminPanel.classList.add('hidden'); 
+            editAdminPlaceholder.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Error updating admin:", error);
+            alert(`Error: Failed to save changes. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    });
+
+    window.deleteAdminUser = async () => {
+        const docId = document.getElementById('edit-admin-doc-id').value;
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'admins', docId);
+            await deleteDoc(docRef);
+            alert(`Admin user deleted successfully.`);
+            editAdminPanel.classList.add('hidden'); 
+            editAdminPlaceholder.classList.remove('hidden');
+        } catch (error) {
+            console.error("Error deleting admin:", error);
+            alert(`Error: Failed to delete admin. ${error.message}`);
+        }
+    };
+
+
+    // --- ABOUT MEMBER EDIT & DELETE LOGIC ---
+
+    window.startAboutEdit = (docId, collectionName) => {
+        
+        if (!globalAboutMembers[collectionName]) {
+             console.error(`Collection data for ${collectionName} is not yet loaded.`);
+             alert("Member data is loading or missing. Please try again.");
+             return;
+        }
+        
+        const member = globalAboutMembers[collectionName][docId];
+        if (!member) {
+            alert("Member data not found for editing.");
+            return;
+        }
+
+        document.getElementById('edit-about-doc-id').value = docId;
+        document.getElementById('edit-about-collection').value = collectionName;
+        document.getElementById('edit-about-old-photo-url').value = member.photo || '';
+        document.getElementById('edit-about-name').value = member.name;
+        document.getElementById('edit-about-designation').value = member.designation;
+        document.getElementById('edit-about-photo-preview').src = member.photo || 'https://placehold.co/150x150?text=Photo';
+        document.getElementById('edit-about-photo').value = ''; 
+
+        const phoneField = document.getElementById('edit-about-phone-field');
+        if (collectionName === 'about_faculty') {
+            phoneField.classList.remove('hidden');
+            document.getElementById('edit-about-phone').value = member.phone || '';
+        } else {
+            phoneField.classList.add('hidden');
+            document.getElementById('edit-about-phone').value = '';
+        }
+
+        document.getElementById('edit-about-placeholder').classList.add('hidden');
+        document.getElementById('edit-about-panel').classList.remove('hidden');
+        
+        document.getElementById('edit-about-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    async function saveAboutEdit(e) {
+        e.preventDefault();
+        const docId = document.getElementById('edit-about-doc-id').value;
+        const collectionName = document.getElementById('edit-about-collection').value;
+        const oldPhotoUrl = document.getElementById('edit-about-old-photo-url').value;
+        const name = document.getElementById('edit-about-name').value;
+        const designation = document.getElementById('edit-about-designation').value;
+        const phone = document.getElementById('edit-about-phone').value;
+        const photoFile = document.getElementById('edit-about-photo').files[0];
+
+        const btn = document.getElementById('saveAboutEditBtn');
+        const spinner = document.getElementById('edit-about-spinner');
+        
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            let newPhotoUrl = oldPhotoUrl;
+
+            if (photoFile) {
+                newPhotoUrl = await uploadImage(photoFile);
+                if (!newPhotoUrl) throw new Error("New image upload failed.");
+            }
+
+            let updateData = {
+                name: name,
+                designation: designation,
+                photo: newPhotoUrl
+            };
+
+            if (collectionName === 'about_faculty') {
+                updateData.phone = phone;
+            }
+            
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', collectionName, docId);
+            await updateDoc(docRef, updateData);
+
+            alert(`Successfully updated ${name} in ${collectionName.split('_')[1]}.`);
+            document.getElementById('edit-about-panel').classList.add('hidden'); 
+            document.getElementById('edit-about-placeholder').classList.remove('hidden');
+
+            loadAboutMembers(collectionName);
+
+        } catch (error) {
+            console.error("Error updating about member:", error);
+            alert(`Error: Failed to save changes. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    }
+
+    window.deleteAboutMember = async () => {
+        const docId = document.getElementById('edit-about-doc-id').value;
+        const collectionName = document.getElementById('edit-about-collection').value;
+        const name = document.getElementById('edit-about-name').value;
+
+        console.warn(`Attempting to delete ${name} from ${collectionName.split('_')[1]}. A real app should use a custom confirmation modal.`);
+        
+        try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', collectionName, docId);
+            await deleteDoc(docRef);
+
+            alert(`${name} has been successfully deleted.`);
+            document.getElementById('edit-about-panel').classList.add('hidden'); 
+            document.getElementById('edit-about-placeholder').classList.remove('hidden');
+
+            loadAboutMembers(collectionName);
+
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            alert(`Error: Failed to delete member. ${error.message}`);
+        }
+    };
+
+
+    // --- ABOUT US FORM SUBMISSIONS ---
+    async function addManagementMember(e) {
+        e.preventDefault();
+        const btn = document.getElementById('addMgmtBtn');
+        const spinner = document.getElementById('mgmt-spinner');
+        const imageInput = document.getElementById('mgmtPhoto');
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            const imgFile = imageInput.files[0];
+            if (!imgFile) throw new Error("Please select a photo.");
+
+            const imageUrl = await uploadImage(imgFile);
+            if (!imageUrl) throw new Error("Image upload failed.");
+
+            const path = collection(db, 'artifacts', appId, 'public', 'data', 'about_management');
+            await addDoc(path, {
+                name: document.getElementById('mgmtName').value,
+                designation: document.getElementById('mgmtDesignation').value,
+                photo: imageUrl,
+                order: 99,
+                createdAt: Timestamp.now()
+            });
+
+            alert(`Success: Management member "${document.getElementById('mgmtName').value}" added.`);
+            document.getElementById('managementForm').reset();
+            loadAboutMembers('about_management'); 
+
+        } catch (error) {
+            console.error("Error adding management member:", error);
+            alert(`Error: Failed to add management member. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    }
+
+    async function addFacultyMember(e) {
+        e.preventDefault();
+        const btn = document.getElementById('addFacultyBtn');
+        const spinner = document.getElementById('faculty-spinner');
+        const imageInput = document.getElementById('facultyPhoto');
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+
+        try {
+            const imgFile = imageInput.files[0];
+            if (!imgFile) throw new Error("Please select a photo.");
+
+            const imageUrl = await uploadImage(imgFile);
+            if (!imageUrl) throw new Error("Image upload failed.");
+
+            const path = collection(db, 'artifacts', appId, 'public', 'data', 'about_faculty');
+            await addDoc(path, {
+                name: document.getElementById('facultyName').value,
+                designation: document.getElementById('facultyDesignation').value,
+                phone: document.getElementById('facultyPhone').value, 
+                photo: imageUrl,
+                order: 99,
+                createdAt: Timestamp.now()
+            });
+
+            alert(`Success: Faculty member "${document.getElementById('facultyName').value}" added.`);
+            document.getElementById('facultyForm').reset();
+            loadAboutMembers('about_faculty'); 
+
+
+        } catch (error) {
+            console.error("Error adding faculty member:", error);
+            alert(`Error: Failed to add faculty member. ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+        }
+    }
+
+
+    // --- FORM SUBMISSION ---
+    function setupForms() {
+        
+        // NEW ADMIN SUBMISSION
+        document.getElementById('adminUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('addAdminBtn');
+            const spinner = document.getElementById('admin-spinner');
+            
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'admins');
+                await addDoc(path, {
+                    name: document.getElementById('adminName').value,
+                    username: document.getElementById('adminUsername').value,
+                    password: document.getElementById('adminPassword').value,
+                    role: 'admin',
+                    createdAt: Timestamp.now()
+                });
+
+                alert(`Success: Admin user created.`);
+                document.getElementById('adminUserForm').reset();
+                loadAdmins(); 
+
+            } catch (error) {
+                console.error("Error adding admin:", error);
+                alert(`Error: Failed to create admin. ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+
+        // NEW EVENT SUBMISSION
+        document.getElementById('upcomingEventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('addEventBtn');
+            const spinner = document.getElementById('event-spinner');
+            
+            const useCustom = document.getElementById('useCustomColors').checked;
+            const bgColor = document.getElementById('eventBgColor').value;
+            const textColor = document.getElementById('eventTextColor').value;
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'upcoming_events');
+                await addDoc(path, {
+                    date: document.getElementById('eventDate').value,
+                    title: document.getElementById('eventTitle').value,
+                    location: document.getElementById('eventLocation').value,
+                    bgColor: useCustom ? bgColor : null,
+                    textColor: useCustom ? textColor : null,
+                    createdAt: Timestamp.now()
+                });
+
+                alert(`Success: Event added.`);
+                document.getElementById('upcomingEventForm').reset();
+                document.getElementById('useCustomColors').checked = false; // Reset toggle
+                toggleColorInputs('add'); // Hide inputs
+                loadUpcomingEvents(); 
+
+            } catch (error) {
+                console.error("Error adding event:", error);
+                alert(`Error: Failed to add event. ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('newsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('addNewsBtn');
+            const spinner = document.getElementById('news-spinner');
+            const imageInput = document.getElementById('newsImage');
+            const dateInput = document.getElementById('newsDate'); 
+            const isSpotlight = document.getElementById('newsSpotlight').checked; 
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const imgFile = imageInput.files[0];
+                if (!imgFile) throw new Error("Please select an image file.");
+                
+                const imageUrl = await uploadImage(imageInput.files[0]);
+                if (!imageUrl) throw new Error("Image upload failed.");
+
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'news');
+                await addDoc(path, {
+                    title: document.getElementById('newsTitle').value,
+                    description: document.getElementById('newsDesc').value,
+                    date: dateInput.value, 
+                    category: document.getElementById('newsCategory').value,
+                    image: imageUrl,
+                    isSpotlight: isSpotlight,
+                    createdAt: Timestamp.now()
+                });
+
+                alert(`Success: News "${document.getElementById('newsTitle').value}" published.`);
+                document.getElementById('newsForm').reset();
+                
+                loadNewsPosts(false); 
+
+            } catch (error) {
+                console.error("Error adding news:", error);
+                alert(`Error: Failed to publish news. ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('officeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('addOfficeBtn');
+            const spinner = document.getElementById('office-spinner');
+            const imageInput = document.getElementById('officePhoto');
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const imgFile = imageInput.files[0];
+                if (!imgFile) throw new Error("Please select a photo.");
+
+                const imageUrl = await uploadImage(imgFile);
+                if (!imageUrl) throw new Error("Image upload failed.");
+
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'offices');
+                const department = document.getElementById('officeDepartment').value;
+                await addDoc(path, {
+                    name: document.getElementById('officeName').value,
+                    designation: document.getElementById('officeInfo').value,
+                    duty: document.getElementById('officeDuty').value, // ADDED: Capture Duty
+                    department: department,
+                    photo: imageUrl,
+                    order: 99
+                });
+
+                alert(`Success: Office member "${document.getElementById('officeName').value}" added to ${department}.`);
+                document.getElementById('officeForm').reset();
+                const currentOfficeView = document.querySelector('.office-nav-btn.active')?.dataset.office;
+                if (currentOfficeView === department) {
+                    loadOfficeMembers(department);
+                }
+                
+                getStaffCount(); 
+
+            } catch (error) {
+                console.error("Error adding office member:", error);
+                alert(`Error: Failed to add office member. ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('managementForm').addEventListener('submit', addManagementMember);
+        document.getElementById('facultyForm').addEventListener('submit', addFacultyMember);
+        document.getElementById('editAboutForm').addEventListener('submit', saveAboutEdit); 
+
+
+        document.getElementById('saveHeroVideoBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            saveHeroVideo();
+        });
+    }
+
+
+    // --- MAIN EXECUTION ---
+    initializeFirebase();
+    lucide.createIcons();
+
+</script>
+</body>
+</html>

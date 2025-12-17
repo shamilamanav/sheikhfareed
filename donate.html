@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - SFADC ODAMALA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --sfadc-black: #000000;
+            --sfadc-white: #FFFFFF;
+            --sfadc-green: #3AB54A;       
+            --sfadc-green-dark: #2a8c38; 
+            --sfadc-gold: #DFA975;        
+            --sfadc-yellow: #FFF200;      
+            --sfadc-brown: #8C5835;       
+            --sfadc-blue: #0076BD;        
+            --sfadc-red: #ED1C24;         
+            --sfadc-dark-bg: #004875;     
+        }
+        body { font-family: 'Manrope', sans-serif; overflow-x: hidden; scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: var(--sfadc-yellow); transition: width 0.3s ease-in-out; }
+        .nav-link:hover::after { width: 100%; }
+        .anim-hidden { opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: opacity, transform; }
+        .fade-up { transform: translateY(30px); }
+        .fade-right { transform: translateX(-30px); }
+        .fade-left { transform: translateX(30px); }
+        .anim-active { opacity: 1; transform: translate(0) scale(1); }
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+
+         /* Mobile Menu Scrollbar Hide */
+         .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700 flex flex-col min-h-screen">
+
+    <!-- MOBILE MENU OVERLAY (Updated with Fade/Scale Animation) -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-[#004875] flex flex-col h-[100dvh] w-screen transition-all duration-300 ease-in-out opacity-0 invisible scale-95">
+        <!-- Mobile Menu Header -->
+        <div class="flex justify-between items-center p-4 border-b border-white/10">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="label.png" onerror="this.src='https://placehold.co/100x50?text=SFADC'" alt="SFADC" class="h-10">
+            </a>
+            <button onclick="toggleMobileMenu()" class="text-white p-2 hover:bg-white/10 rounded-full transition-colors">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Links -->
+        <div class="flex-1 overflow-y-auto py-8 px-6 flex flex-col items-center space-y-6 no-scrollbar">
+            <a href="index.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white hover:text-[var(--sfadc-yellow)]">Home</a>
+            <a href="about.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">About</a>
+
+            <!-- Mobile Offices List -->
+            <div class="flex flex-col items-center gap-4 w-full border-y border-white/10 py-6 bg-white/5 rounded-xl px-4">
+                <span class="text-lg font-bold text-[var(--sfadc-gold)] uppercase tracking-wider">Our Offices</span>
+                <div class="flex flex-col items-center gap-4 w-full text-center">
+                    <a href="office.html" class="text-base text-slate-300 hover:text-white">Academic Co-ordinator</a>
+                    <a href="welfare.html" class="text-base text-slate-300 hover:text-white">Office of Welfare</a>
+                    <a href="imad.html" class="text-base text-slate-300 hover:text-white">IMAD Students Union</a>
+                    <a href="hadeeth.html" class="text-base text-slate-300 hover:text-white">Hadeeth Department</a>
+                    <a href="out.html" class="text-base text-slate-300 hover:text-white">Outreach Wing</a>
+                </div>
+            </div>
+
+            <a href="donate.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white hover:text-[var(--sfadc-green)]">Donate</a>
+            <a href="news.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">News & Events</a>
+            <a href="contact.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">Contact</a>
+            
+            <a href="donate.html" onclick="toggleMobileMenu()" class="px-8 py-3 bg-[var(--sfadc-gold)] text-black font-bold rounded-full mt-auto w-full text-center shadow-lg transform active:scale-95 transition-transform">Donate Now</a>
+        </div>
+        
+        <div class="p-4 text-center text-white/30 text-xs border-t border-white/10">
+            © 2025 SFADC Odamala
+        </div>
+    </div>
+
+    <!-- HEADER SECTION -->
+    <header id="main-header" class="fixed w-full z-40 transition-all duration-300 top-0 py-3 md:py-4 bg-gradient-to-b from-[#004875]/90 to-transparent">
+        <nav class="container mx-auto px-4 md:px-12 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 group relative z-50">
+                <img src="label.png" onerror="this.src='https://placehold.co/100x50?text=SFADC'" alt="SFADC ODAMALA" class="h-10 md:h-14 group-hover:opacity-90 transition-opacity">
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:flex items-center gap-8 text-sm font-semibold">
+                <a href="index.html" class="nav-link relative text-white/90 hover:text-white">Home</a>
+                <a href="about.html" class="nav-link relative text-white/90 hover:text-white">About</a>
+                  <div class="relative group">
+                <button class="nav-link relative text-white/90 hover:text-white flex items-center gap-1 focus:outline-none">
+                    Academics<i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180"></i>
+                </button>
+                <div class="absolute top-full -left-4 pt-4 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+                    <div class="bg-white shadow-xl rounded-xl border border-slate-100 overflow-hidden py-2 flex flex-col">
+                        <a href="office.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Office of Academic Co-ordinator
+                        </a>
+                        <a href="welfare.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Office of Welfare
+                        </a>
+                        <a href="imad.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> IMAD Students Union
+                        </a>
+                        <a href="hadeeth.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Hadeeth Department
+                        </a>
+                        <a href="out.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Outreach
+                        </a>
+                    </div>
+                </div>
+            </div>
+           
+            <a href="donate.html" class="nav-link relative text-white/90 hover:text-white">Donate</a>
+            
+            <a href="news.html" class="nav-link relative text-white/90 hover:text-white">News & Events</a>
+            <a href="contact.html" class="nav-link relative text-white/90 hover:text-white">Contact</a>
+
+            <a href="donate.html" class="ml-2 px-6 py-2.5 bg-[var(--sfadc-gold)] hover:bg-[var(--sfadc-yellow)] text-black font-bold rounded-full transition-transform hover:scale-105 shadow-[0_0_15px_rgba(223,169,117,0.3)] whitespace-nowrap">
+                Donate
+            </a>
+        </div>
+
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="lg:hidden text-white p-2 focus:outline-none hover:bg-white/10 rounded-full transition-colors relative z-50">
+                <i data-lucide="menu" class="w-8 h-8"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Page Title / Hero Section -->
+    <div class="bg-[#004875] text-white pt-32 pb-20 px-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div class="container mx-auto text-center anim-hidden fade-up relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Support Our Mission</h1>
+            <p class="text-[var(--sfadc-gold)] max-w-2xl mx-auto font-medium">Your contribution helps light the lamp of knowledge for future generations.</p>
+        </div>
+    </div>
+
+    <!-- SPONSOR A STUDENT SECTION (Layout Enhanced) -->
+    <section class="py-16 bg-slate-50">
+        <div class="container mx-auto px-4 md:px-12 text-center max-w-6xl">
+            <!-- Title color changed to SFADC Blue -->
+            <h2 class="text-3xl md:text-4xl font-extrabold text-[var(--sfadc-blue)] mb-4 anim-hidden fade-up">Sponsor a student</h2>
+            <p class="text-slate-600 max-w-3xl mx-auto mb-12 anim-hidden fade-up delay-100">
+                Sponsor a student at Manhajurrashad Islamic College and help us provide a comprehensive education for those who need it most. Your contribution can make a world of difference in shaping the future of our students and the wider community.
+            </p>
+
+            <!-- Updated grid to lg:grid-cols-3 after removing the custom card -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Card 1: One Day -->
+                <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex flex-col items-center anim-hidden fade-up delay-200 hover:shadow-2xl transition-shadow duration-300">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 text-[var(--sfadc-blue)] flex items-center justify-center mb-4">
+                        <i data-lucide="sun" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">One Day</h3>
+                    <p class="text-sm text-slate-500 mb-4 h-10 flex items-center justify-center text-center">Fund one full day of essential needs.</p>
+                    <div class="flex-grow flex items-center justify-center py-4">
+                        <p class="text-5xl font-extrabold text-[var(--sfadc-gold)]">₹300</p>
+                    </div>
+                    <!-- Button with scroll action -->
+                    <button onclick="scrollToPayment()" class="w-full py-3 bg-[var(--sfadc-gold)] hover:bg-[var(--sfadc-brown)] text-black font-bold rounded-full mt-4 transition-colors transform hover:scale-[1.02] active:scale-95 shadow-md">
+                        Pay Now
+                    </button>
+                </div>
+
+                <!-- Card 2: One Month (Highlighted) -->
+                <div class="bg-white p-6 rounded-2xl shadow-2xl border-4 border-[var(--sfadc-gold)] flex flex-col items-center relative overflow-hidden transform scale-[1.03] shadow-[0_20px_40px_-10px_rgba(223,169,117,0.4)]">
+                    
+                    <div class="absolute top-0 right-0 bg-[var(--sfadc-gold)] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Most Popular</div>
+
+                    <div class="w-16 h-16 rounded-full bg-[var(--sfadc-gold)] text-white flex items-center justify-center mb-4 mt-2">
+                        <i data-lucide="calendar" class="w-8 h-8"></i>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">One Month</h3>
+                    <p class="text-sm text-slate-500 mb-4 h-10 flex items-center justify-center text-center">Cover tuition, food, and lodging for 30 days.</p>
+                    <div class="flex-grow flex items-center justify-center py-4">
+                        <p class="text-5xl font-extrabold text-[var(--sfadc-gold)]">₹9000</p>
+                    </div>
+                    <!-- Button with scroll action -->
+                    <button onclick="scrollToPayment()" class="w-full py-3 bg-[var(--sfadc-gold)] hover:bg-[var(--sfadc-brown)] text-black font-extrabold rounded-full mt-4 transition-colors transform hover:scale-[1.02] active:scale-95 shadow-lg">
+                        Sponsor Now
+                    </button>
+                </div>
+                
+                <!-- Card 3: One Year -->
+                <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex flex-col items-center anim-hidden fade-up delay-300 hover:shadow-2xl transition-shadow duration-300">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 text-[var(--sfadc-blue)] flex items-center justify-center mb-4">
+                        <i data-lucide="scroll-text" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">One Year</h3>
+                    <p class="text-sm text-slate-500 mb-4 h-10 flex items-center justify-center text-center">Ensure a student's entire academic journey for a year.</p>
+                    <div class="flex-grow flex items-center justify-center py-4">
+                        <p class="text-5xl font-extrabold text-[var(--sfadc-gold)]">₹36000</p>
+                    </div>
+                    <!-- Button with scroll action -->
+                    <button onclick="scrollToPayment()" class="w-full py-3 bg-[var(--sfadc-gold)] hover:bg-[var(--sfadc-brown)] text-black font-bold rounded-full mt-4 transition-colors transform hover:scale-[1.02] active:scale-95 shadow-md">
+                        Pay Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- END SPONSOR A STUDENT SECTION -->
+
+    <!-- Added id="payment-methods" to the main content section for scrolling -->
+    <section class="py-16 container mx-auto px-4 md:px-12" id="payment-methods">
+        <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 mb-16">
+            <div class="anim-hidden fade-right">
+                <h2 class="text-2xl font-bold mb-4">Why Donate?</h2>
+                <p class="text-slate-600 mb-4">SFADC is run by the Odamala Mahallu committee and relies on the generous support of the community to maintain its facilities, support underprivileged students, and expand its academic capabilities.</p>
+                <ul class="space-y-3 mt-6">
+                    <li class="flex items-center gap-3 text-slate-700"><i data-lucide="check-circle" class="text-[var(--sfadc-green)] w-5 h-5"></i> Sponsor a Student's Education</li>
+                    <li class="flex items-center gap-3 text-slate-700"><i data-lucide="check-circle" class="text-[var(--sfadc-green)] w-5 h-5"></i> Infrastructure Development</li>
+                    <li class="flex items-center gap-3 text-slate-700"><i data-lucide="check-circle" class="text-[var(--sfadc-green)] w-5 h-5"></i> Library & Research Funding</li>
+                </ul>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 anim-hidden fade-left delay-200">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-blue-50 text-[#004875] rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="credit-card" class="w-8 h-8"></i></div>
+                    <h3 class="text-xl font-bold">Payment Methods</h3>
+                    <p class="text-sm text-slate-500">Choose your preferred way to donate</p>
+                </div>
+                
+                <div class="space-y-4 bg-slate-50 p-6 rounded-lg text-sm text-slate-700 mb-6">
+                    <div class="flex justify-between border-b border-slate-200 pb-2"><span class="font-medium">Account Name:</span><span>SFADC Odamala</span></div>
+                    <div class="flex justify-between border-b border-slate-200 pb-2"><span class="font-medium">Account Number:</span><span class="font-mono">1234 5678 9012 3456</span></div>
+                    <div class="flex justify-between border-b border-slate-200 pb-2"><span class="font-medium">Bank:</span><span>State Bank of India</span></div>
+                    <div class="flex justify-between"><span class="font-medium">IFSC Code:</span><span class="font-mono">SBIN0001234</span></div>
+                </div>
+
+                <!-- General Donation QR Code -->
+                <div class="text-center">
+                    <p class="font-bold text-slate-800 mb-2">Scan to Donate</p>
+                    <div class="bg-white p-2 inline-block rounded-lg border border-slate-200 shadow-sm">
+                        <!-- Placeholder QR Code - Replace src with your actual QR code image -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GeneralDonationSFADC" alt="Donate QR Code" class="w-32 h-32 mx-auto mix-blend-multiply">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Accepts UPI, GPay, PhonePe</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- New 10th Standard Project Section -->
+        <div class="max-w-4xl mx-auto anim-hidden fade-up delay-200">
+            <div class="bg-gradient-to-r from-slate-900 to-[#004875] rounded-3xl p-8 md:p-12 text-white relative overflow-hidden shadow-2xl">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row items-center gap-10">
+                    <div class="flex-1 text-center md:text-left">
+                        <span class="bg-[var(--sfadc-red)] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">Special Campaign</span>
+                        <h2 class="text-3xl font-bold mb-4">10th Standard Project</h2>
+                        <p class="text-blue-100 mb-6 leading-relaxed">
+                            Support our innovative educational project for the 10th standard batch. Your contribution will help provide necessary materials, technology, and resources to ensure their academic success and skill development.
+                        </p>
+                        <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                            <span class="flex items-center gap-2 text-sm bg-white/10 px-3 py-1.5 rounded-lg border border-white/20"><i data-lucide="book" class="w-4 h-4"></i> Study Materials</span>
+                            <span class="flex items-center gap-2 text-sm bg-white/10 px-3 py-1.5 rounded-lg border border-white/20"><i data-lucide="laptop" class="w-4 h-4"></i> Tech Support</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-lg text-center min-w-[200px] transform hover:scale-105 transition-transform">
+                        <p class="text-slate-900 font-bold mb-3 text-sm">Scan to Support Project</p>
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 inline-block">
+                             <!-- Placeholder QR Code for Project - Replace src with your actual Project QR code image -->
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=10thStandardProjectFund" alt="Project QR Code" class="w-40 h-40 mix-blend-multiply">
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3 font-medium">10th Std Fund</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+<footer class="relative bg-[#004875] text-white py-12 lg:py-16 overflow-hidden font-manrope text-sm">
+    <div class="absolute inset-0 z-0 pointer-events-none">
+        <img src="students.jpg" onerror="this.style.display='none'" alt="Footer Background" class="w-full h-full object-cover opacity-10 grayscale">
+        <div class="absolute inset-0 bg-[#004875]/90 mix-blend-multiply"></div> 
+        <div class="absolute inset-0 bg-gradient-to-t from-[#004875] via-transparent to-transparent"></div>
+    </div>
+
+    <div class="container mx-auto px-6 md:px-12 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+            <div class="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5">
+                <div class="space-y-4">
+                    <img src="IMG-20180829-WA0074__1_-removebg-preview.png" onerror="this.style.display='none'" alt="SFADC Logo" class="h-20 md:h-24 w-auto drop-shadow-2xl mx-auto lg:mx-0">
+                    <div class="space-y-1">
+                        <h2 class="text-xl md:text-3xl font-extrabold uppercase leading-tight tracking-tight text-white">
+                            Sheikh Fareed Auliya<br>Da'wa College
+                        </h2>
+                        <div class="flex items-center justify-center lg:justify-start gap-3">
+                            <span class="h-[1px] w-8 bg-[var(--sfadc-gold)]"></span>
+                            <p class="text-xs font-bold text-[var(--sfadc-gold)] tracking-[0.2em] uppercase">
+                                Perinthalmanna
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-slate-300 text-xs leading-6 font-light">
+                    <p>Odamala, Perinthalmanna, Malappuram Dist.<br>Kerala, India - 679322</p>
+                    <div class="mt-3 space-y-1">
+                        <p class="flex items-center justify-center lg:justify-start gap-2">
+                            <i data-lucide="phone" class="w-3 h-3 text-[var(--sfadc-green)]"></i>
+                            <span class="text-white font-medium">+91 9876 543 210</span>
+                        </p>
+                        <p class="flex items-center justify-center lg:justify-start gap-2">
+                            <i data-lucide="mail" class="w-3 h-3 text-[var(--sfadc-green)]"></i>
+                            <span class="text-white font-medium">sfadcodamala@gmail.com</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <a href="#" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[var(--sfadc-gold)] hover:border-[var(--sfadc-gold)] hover:text-black transition-all duration-300">
+                        <i data-lucide="instagram" class="w-3 h-3"></i>
+                    </a>
+                    <a href="#" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[var(--sfadc-gold)] hover:border-[var(--sfadc-gold)] hover:text-black transition-all duration-300">
+                        <i data-lucide="facebook" class="w-3 h-3 fill-current"></i>
+                    </a>
+                    
+                    <a href="#" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:text-white transition-all duration-300">
+                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </a>
+
+                    <a href="https://wa.me/919876543210" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:text-white transition-all duration-300">
+                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 flex flex-col items-center lg:items-start pt-2 px-0 md:px-4 w-full">
+                <div class="grid grid-cols-2 gap-4 md:gap-8 w-full max-w-sm lg:max-w-full mx-auto">
+                    
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-widest border-b border-white/20 pb-3">
+                            Quick Links
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li><a href="index.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>Home</a></li>
+                            <li><a href="about.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>About Us</a></li>
+                            <li><a href="donate.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>Donate</a></li>
+                            <li><a href="news.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>News & Events</a></li>
+                            <li><a href="contact.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-widest border-b border-white/20 pb-3">
+                            Academics
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li><a href="office.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Academic Office</a></li>
+                            <li><a href="welfare.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Welfare Office</a></li>
+                            <li><a href="imad.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>IMAD Union</a></li>
+                            <li><a href="hadeeth.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Hadeeth Dept</a></li>
+                            <li><a href="out.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Outreach</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 flex flex-col items-center lg:items-end pt-2 w-full">
+                <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-widest border-b border-white/20 pb-3 w-full max-w-[180px] text-center lg:text-right">
+                    Support Our Mission
+                </h3>
+                
+                <div class="bg-white p-3 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.3)] w-[180px] transform hover:-translate-y-2 transition-transform duration-500">
+                    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-2 border border-slate-200">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=SFADC-Donation" alt="Donate QR" class="w-full h-full object-cover mix-blend-multiply">
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[var(--sfadc-blue)] font-bold text-sm uppercase tracking-wide">Donate Now</p>
+                        <p class="text-slate-500 text-[10px] mt-0.5">Scan to contribute via UPI/Bank</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="mt-12 md:mt-16 border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-medium text-slate-500 uppercase tracking-wider text-center md:text-left">
+            <p>© 2025 Sheikh Fareed Auliya Da'wa College.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition-colors">Terms of Use</a>
+            </div>
+        </div>
+    </div>
+</footer>
+    <script>
+        lucide.createIcons();
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('anim-active');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.anim-hidden').forEach(el => observer.observe(el));
+        
+        // Function to scroll to the payment methods section
+        function scrollToPayment() {
+            const paymentSection = document.getElementById('payment-methods');
+            if (paymentSection) {
+                // Smoothly scroll the payment section into view
+                paymentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Updated Toggle Mobile Menu Script
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            
+            // Toggle Logic for Fade/Scale  
+            if (menu.classList.contains('invisible')) {
+                // Open Menu
+                menu.classList.remove('invisible', 'opacity-0', 'scale-95');
+                menu.classList.add('visible', 'opacity-100', 'scale-100');
+                document.body.style.overflow = 'hidden'; // Lock scroll
+            } else {
+                // Close Menu
+                menu.classList.remove('visible', 'opacity-100', 'scale-100');
+                menu.classList.add('invisible', 'opacity-0', 'scale-95');
+                document.body.style.overflow = 'auto'; // Unlock scroll
+            }
+        }
+
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.remove('py-3', 'md:py-4', 'bg-gradient-to-b', 'from-[#004875]/90', 'to-transparent');
+                header.classList.add('bg-[#004875]/95', 'backdrop-blur-md', 'shadow-lg', 'py-2');
+            } else {
+                header.classList.add('py-3', 'md:py-4', 'bg-gradient-to-b', 'from-[#004875]/90', 'to-transparent');
+                header.classList.remove('bg-[#004875]/95', 'backdrop-blur-md', 'shadow-lg', 'py-2');
+            }
+        });
+    </script>
+</body>
+</html>

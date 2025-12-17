@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Office of Academic Co-ordinator - SFADC ODAMALA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            /* Base Colors */
+            --sfadc-black: #000000;
+            --sfadc-white: #FFFFFF;
+            
+            /* Logo Extracted Colors */
+            --sfadc-green: #3AB54A;       
+            --sfadc-green-dark: #2a8c38; 
+            --sfadc-gold: #DFA975;        
+            --sfadc-yellow: #FFF200;      
+            --sfadc-brown: #8C5835;       
+            --sfadc-blue: #0076BD;        
+            --sfadc-red: #ED1C24;         
+            
+            /* Derived UI Colors */
+            --sfadc-dark-bg: #004875;     
+        }
+
+        body { font-family: 'Manrope', sans-serif; overflow-x: hidden; scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+        
+        /* Navigation Hover underline effect */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: var(--sfadc-yellow);
+            transition: width 0.3s ease-in-out;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* Animation Classes */
+        .anim-hidden { opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: opacity, transform; }
+        .fade-up { transform: translateY(30px); }
+        .fade-right { transform: translateX(-30px); }
+        .fade-left { transform: translateX(30px); }
+        .zoom-in { transform: scale(0.95); }
+        .anim-active { opacity: 1; transform: translate(0) scale(1); }
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+
+        /* Mobile Menu Scrollbar Hide */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--sfadc-blue);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700 flex flex-col min-h-screen">
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-[#004875] flex flex-col h-[100dvh] w-screen transition-all duration-300 ease-in-out opacity-0 invisible scale-95">
+        <!-- Mobile Menu Header -->
+        <div class="flex justify-between items-center p-4 border-b border-white/10">
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="label.png" onerror="this.src='https://placehold.co/100x50?text=SFADC'" alt="SFADC" class="h-10">
+            </a>
+            <button onclick="toggleMobileMenu()" class="text-white p-2 hover:bg-white/10 rounded-full transition-colors">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Links -->
+        <div class="flex-1 overflow-y-auto py-8 px-6 flex flex-col items-center space-y-6 no-scrollbar">
+            <a href="index.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white hover:text-[var(--sfadc-yellow)]">Home</a>
+            <a href="about.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">About</a>
+
+            <!-- Mobile Offices List -->
+            <div class="flex flex-col items-center gap-4 w-full border-y border-white/10 py-6 bg-white/5 rounded-xl px-4">
+                <span class="text-lg font-bold text-[var(--sfadc-gold)] uppercase tracking-wider">Our Offices</span>
+                <div class="flex flex-col items-center gap-4 w-full text-center">
+                    <a href="office.html" onclick="toggleMobileMenu()" class="text-base font-bold text-white py-2 px-6 bg-blue-600 rounded-full shadow-lg">Academic Co-ordinator</a>
+                    <a href="welfare.html" class="text-base text-slate-300 hover:text-white">Office of Welfare</a>
+                    <a href="imad.html" class="text-base text-slate-300 hover:text-white">IMAD Students Union</a>
+                    <a href="hadeeth.html" class="text-base text-slate-300 hover:text-white">Hadeeth Department</a>
+                    <a href="out.html" class="text-base text-slate-300 hover:text-white">Outreach Wing</a>
+                </div>
+            </div>
+
+            <a href="academics.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">Academics</a>
+            <a href="donate.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">Donate</a>
+            <a href="news.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">News & Events</a>
+            <a href="contact.html" onclick="toggleMobileMenu()" class="text-2xl font-bold text-white/80 hover:text-[var(--sfadc-green)]">Contact</a>
+            
+            <a href="donate.html" onclick="toggleMobileMenu()" class="px-8 py-3 bg-[var(--sfadc-gold)] text-black font-bold rounded-full mt-auto w-full text-center shadow-lg transform active:scale-95 transition-transform">Donate Now</a>
+        </div>
+        
+        <div class="p-4 text-center text-white/30 text-xs border-t border-white/10">
+            © 2025 SFADC Odamala
+        </div>
+    </div>
+
+    <!-- MAIN HEADER SECTION -->
+    <header id="main-header" class="fixed w-full z-40 transition-all duration-300 top-0 py-4 bg-gradient-to-b from-[#004875]/90 to-transparent">
+        <nav class="container mx-auto px-4 md:px-12 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-3 group z-50">
+                <img src="label.png" onerror="this.src='https://placehold.co/100x50?text=SFADC'" alt="SFADC ODAMALA" class="h-10 md:h-14 group-hover:opacity-90 transition-opacity">
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-8 text-sm font-semibold">
+                <a href="index.html" class="nav-link relative text-white/90 hover:text-white">Home</a>
+                <a href="about.html" class="nav-link relative text-white/90 hover:text-white">About</a>
+
+                  <div class="relative group">
+                <button class="nav-link relative text-white/90 hover:text-white flex items-center gap-1 focus:outline-none">
+                    Academics<i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180"></i>
+                </button>
+                <div class="absolute top-full -left-4 pt-4 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+                    <div class="bg-white shadow-xl rounded-xl border border-slate-100 overflow-hidden py-2 flex flex-col">
+                        <a href="office.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Office of Academic Co-ordinator
+                        </a>
+                        <a href="welfare.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Office of Welfare
+                        </a>
+                        <a href="imad.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> IMAD Students Union
+                        </a>
+                        <a href="hadeeth.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Hadeeth Department
+                        </a>
+                        <a href="out.html" class="px-6 py-3 hover:bg-slate-50 text-slate-600 hover:text-[#004875] text-sm transition-colors text-left flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Outreach
+                        </a>
+                    </div>
+                </div>
+            </div>
+           
+            <a href="donate.html" class="nav-link relative text-white/90 hover:text-white">Donate</a>
+            
+            <a href="news.html" class="nav-link relative text-white/90 hover:text-white">News & Events</a>
+            <a href="contact.html" class="nav-link relative text-white/90 hover:text-white">Contact</a>
+
+            <a href="donate.html" class="ml-2 px-6 py-2.5 bg-[var(--sfadc-gold)] hover:bg-[var(--sfadc-yellow)] text-black font-bold rounded-full transition-transform hover:scale-105 shadow-[0_0_15px_rgba(223,169,117,0.3)] whitespace-nowrap">
+                Donate
+            </a>
+        </div>
+
+            <!-- Mobile Menu Open Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-white p-2 focus:outline-none hover:bg-white/10 rounded-full transition-colors z-50">
+                <i data-lucide="menu" class="w-8 h-8"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="bg-[#004875] text-white pt-32 pb-20 px-4 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-[var(--sfadc-blue)]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-[var(--sfadc-gold)]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+        
+        <div class="container mx-auto text-center relative z-10 anim-hidden fade-up">
+            <span class="bg-white/10 text-white border border-white/20 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 inline-block backdrop-blur-sm">Academic Administration</span>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight">Office of the <br>Academic Co-ordinator</h1>
+            <p class="text-slate-300 max-w-2xl mx-auto text-lg leading-relaxed">
+                Ensuring the highest standards of education, curriculum management, and academic scheduling at SFADC.
+            </p>
+        </div>
+    </div>
+
+    <!-- Functions Section -->
+    <section class="py-16 container mx-auto px-4 md:px-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="anim-hidden fade-right">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Pillar of Academics</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    The Office of the Academic Co-ordinator acts as the backbone of SFADC's educational system. From designing time-tables to conducting examinations and monitoring faculty performance, we ensure a seamless academic experience.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-blue-100 p-3 rounded-lg text-[var(--sfadc-blue)] flex-shrink-0"><i data-lucide="calendar" class="w-6 h-6"></i></div>
+                        <div><h4 class="font-bold text-slate-900 text-lg">Scheduling & Planning</h4><p class="text-sm text-slate-500 mt-1">Managing the academic calendar and events.</p></div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-blue-100 p-3 rounded-lg text-[var(--sfadc-blue)] flex-shrink-0"><i data-lucide="file-text" class="w-6 h-6"></i></div>
+                        <div><h4 class="font-bold text-slate-900 text-lg">Examinations</h4><p class="text-sm text-slate-500 mt-1">Conducting fair and timely assessments.</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-2 rounded-2xl shadow-xl border border-slate-100 transform -rotate-1 hover:rotate-0 transition-transform duration-500 anim-hidden fade-left">
+                <img src="https://placehold.co/600x400/004875/FFF?text=Academic+Office" alt="Academic Office" class="rounded-xl w-full h-auto object-cover aspect-video">
+            </div>
+        </div>
+    </section>
+
+    <!-- Dynamic Team Section -->
+    <section class="py-20 bg-slate-50 border-t border-slate-200">
+        <div class="container mx-auto px-4 md:px-12">
+            <div class="text-center mb-16 anim-hidden fade-up">
+                <span class="text-[var(--sfadc-blue)] font-bold uppercase tracking-wider text-xs">Leadership & Team</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mt-2">Academic Team</h2>
+                <div class="w-20 h-1 bg-[var(--sfadc-blue)] mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- DYNAMIC FLEX CONTAINER (Centered) -->
+            <div id="academic-members-container" class="flex flex-wrap justify-center gap-8 anim-hidden fade-up delay-100">
+                <div class="col-span-full flex justify-center py-12 w-full">
+                     <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER SECTION -->
+   
+<footer class="relative bg-[#004875] text-white py-12 lg:py-16 overflow-hidden font-manrope text-sm">
+    <div class="absolute inset-0 z-0 pointer-events-none">
+        <img src="students.jpg" onerror="this.style.display='none'" alt="Footer Background" class="w-full h-full object-cover opacity-10 grayscale">
+        <div class="absolute inset-0 bg-[#004875]/90 mix-blend-multiply"></div> 
+        <div class="absolute inset-0 bg-gradient-to-t from-[#004875] via-transparent to-transparent"></div>
+    </div>
+
+    <div class="container mx-auto px-6 md:px-12 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+            <div class="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5">
+                <div class="space-y-4">
+                    <img src="IMG-20180829-WA0074__1_-removebg-preview.png" onerror="this.style.display='none'" alt="SFADC Logo" class="h-20 md:h-24 w-auto drop-shadow-2xl mx-auto lg:mx-0">
+                    <div class="space-y-1">
+                        <h2 class="text-xl md:text-3xl font-extrabold uppercase leading-tight tracking-tight text-white">
+                            Sheikh Fareed Auliya<br>Da'wa College
+                        </h2>
+                        <div class="flex items-center justify-center lg:justify-start gap-3">
+                            <span class="h-[1px] w-8 bg-[var(--sfadc-gold)]"></span>
+                            <p class="text-xs font-bold text-[var(--sfadc-gold)] tracking-[0.2em] uppercase">
+                                Perinthalmanna
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-slate-300 text-xs leading-6 font-light">
+                    <p>Odamala, Perinthalmanna, Malappuram Dist.<br>Kerala, India - 679322</p>
+                    <div class="mt-3 space-y-1">
+                        <p class="flex items-center justify-center lg:justify-start gap-2">
+                            <i data-lucide="phone" class="w-3 h-3 text-[var(--sfadc-green)]"></i>
+                            <span class="text-white font-medium">+91 9876 543 210</span>
+                        </p>
+                        <p class="flex items-center justify-center lg:justify-start gap-2">
+                            <i data-lucide="mail" class="w-3 h-3 text-[var(--sfadc-green)]"></i>
+                            <span class="text-white font-medium">sfadcodamala@gmail.com</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <a href="#" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[var(--sfadc-gold)] hover:border-[var(--sfadc-gold)] hover:text-black transition-all duration-300">
+                        <i data-lucide="instagram" class="w-3 h-3"></i>
+                    </a>
+                    <a href="#" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[var(--sfadc-gold)] hover:border-[var(--sfadc-gold)] hover:text-black transition-all duration-300">
+                        <i data-lucide="facebook" class="w-3 h-3 fill-current"></i>
+                    </a>
+                    
+                    <a href="#" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:text-white transition-all duration-300">
+                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </a>
+
+                    <a href="https://wa.me/919876543210" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:text-white transition-all duration-300">
+                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 flex flex-col items-center lg:items-start pt-2 px-0 md:px-4 w-full">
+                <div class="grid grid-cols-2 gap-4 md:gap-8 w-full max-w-sm lg:max-w-full mx-auto">
+                    
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-widest border-b border-white/20 pb-3">
+                            Quick Links
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li><a href="index.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>Home</a></li>
+                            <li><a href="about.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>About Us</a></li>
+                            <li><a href="donate.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>Donate</a></li>
+                            <li><a href="news.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>News & Events</a></li>
+                            <li><a href="contact.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-[var(--sfadc-green)]"></span>Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-widest border-b border-white/20 pb-3">
+                            Academics
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li><a href="office.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Academic Office</a></li>
+                            <li><a href="welfare.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Welfare Office</a></li>
+                            <li><a href="imad.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>IMAD Students Union</a></li>
+                            <li><a href="hadeeth.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Hadeeth Dept</a></li>
+                            <li><a href="out.html" class="flex items-center gap-2 hover:text-[var(--sfadc-gold)] transition-colors"><span class="w-1 h-1 rounded-full bg-slate-500"></span>Outreach</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 flex flex-col items-center lg:items-end pt-2 w-full">
+                <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-widest border-b border-white/20 pb-3 w-full max-w-[180px] text-center lg:text-right">
+                    Support Our Mission
+                </h3>
+                
+                <div class="bg-white p-3 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.3)] w-[180px] transform hover:-translate-y-2 transition-transform duration-500">
+                    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-2 border border-slate-200">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=SFADC-Donation" alt="Donate QR" class="w-full h-full object-cover mix-blend-multiply">
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[var(--sfadc-blue)] font-bold text-sm uppercase tracking-wide">Donate Now</p>
+                        <p class="text-slate-500 text-[10px] mt-0.5">Scan to contribute via UPI/Bank</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="mt-12 md:mt-16 border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-medium text-slate-500 uppercase tracking-wider text-center md:text-left">
+            <p>© 2025 Sheikh Fareed Auliya Da'wa College.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition-colors">Terms of Use</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : JSON.stringify({
+            apiKey: "AIzaSyCpkXW-Y12WP-zn4X25dEe0gaInnjfg-3E",
+            authDomain: "college-a54be.firebaseapp.com",
+            projectId: "college-a54be",
+            storageBucket: "college-a54be.firebasestorage.app",
+            messagingSenderId: "789306619142",
+            appId: "1:789306619142:web:c2128052fe9ab4e094da87"
+        }));
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'college-a54be';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to Fetch and Render Academic Members
+        async function loadAcademicMembers() {
+            const container = document.getElementById('academic-members-container');
+            const path = collection(db, 'artifacts', appId, 'public', 'data', 'offices');
+            // Filter by department 'Academic'
+            const q = query(path, where('department', '==', 'Academic'));
+
+            try {
+                const snapshot = await getDocs(q);
+                container.innerHTML = ''; // Clear loading spinner
+
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="col-span-full w-full text-center text-slate-500 py-8 italic">Academic team members will be updated soon.</p>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const m = doc.data();
+                    
+                    // CARD LAYOUT (Same as about.html)
+                    const card = `
+                        <div class="w-full sm:w-[300px] bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition-transform duration-300 group flex flex-col border border-slate-100">
+                            <div class="w-full h-80 relative bg-slate-100">
+                                <img src="${m.photo || 'https://placehold.co/300x400?text=Member'}" onerror="this.src='https://placehold.co/300x400?text=Member'" alt="${m.name}" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105">
+                            </div>
+                            <div class="p-5 text-center bg-white border-t-4 border-[var(--sfadc-gold)] relative z-10 flex flex-col justify-center flex-1">
+                                <h3 class="font-bold text-lg text-slate-900 leading-tight mb-1">${m.name}</h3>
+                                <p class="text-[var(--sfadc-blue)] font-semibold text-sm tracking-wide uppercase">${m.designation}</p>
+                                ${m.duty ? `<p class="text-xs text-slate-400 mt-2 font-medium italic">${m.duty}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', card);
+                });
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error("Error loading academic members:", error);
+                container.innerHTML = `<p class="col-span-full w-full text-center text-red-500">Failed to load content. Please refresh the page.</p>`;
+            }
+        }
+
+        // Initialize Fetching
+        loadAcademicMembers();
+    </script>
+
+    <script>
+        lucide.createIcons();
+        
+        // Animation Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('anim-active');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.anim-hidden').forEach(el => observer.observe(el));
+
+        // --- HEADER SCROLL LOGIC ---
+        const header = document.getElementById('main-header');
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            
+            // Toggle Logic for Fade/Scale
+            if (menu.classList.contains('invisible')) {
+                // Open Menu
+                menu.classList.remove('invisible', 'opacity-0', 'scale-95');
+                menu.classList.add('visible', 'opacity-100', 'scale-100');
+                document.body.style.overflow = 'hidden'; // Lock scroll
+            } else {
+                // Close Menu
+                menu.classList.remove('visible', 'opacity-100', 'scale-100');
+                menu.classList.add('invisible', 'opacity-0', 'scale-95');
+                document.body.style.overflow = 'auto'; // Unlock scroll
+            }
+        }
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.remove('py-4', 'bg-gradient-to-b', 'from-[#004875]/90', 'to-transparent');
+                header.classList.add('bg-[#004875]/95', 'backdrop-blur-md', 'shadow-lg', 'py-2');
+            } else {
+                header.classList.add('py-4', 'bg-gradient-to-b', 'from-[#004875]/90', 'to-transparent');
+                header.classList.remove('bg-[#004875]/95', 'backdrop-blur-md', 'shadow-lg', 'py-2');
+            }
+        });
+    </script>
+</body>
+</html>
